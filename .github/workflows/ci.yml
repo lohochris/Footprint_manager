@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: footprint
+          POSTGRES_PASSWORD: footprint
+          POSTGRES_DB: footprint_manager
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd "pg_isready -U $POSTGRES_USER"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt  # includes spectral, locust, ruff, mypy, coverage, drf-spectacular
+    - name: Wait for Postgres
+      run: |
+        for i in {1..10}; do
+          pg_isready -h localhost -p 5432 -U footprint && break
+          sleep 1
+        done
+    - name: Django checks
+      run: |
+        python manage.py check
+        python manage.py makemigrations --check
+        python manage.py migrate
+    - name: Run tests with coverage
+      run: |
+        coverage run -m pytest
+        coverage report
+    - name: Lint and type check
+      run: |
+        ruff .
+        mypy .
+    - name: Generate OpenAPI spec
+      run: |
+        python manage.py spectacular --file openapi.yaml
+    - name: Spectral lint
+      run: |
+        spectral lint openapi.yaml
+    - name: Performance tests (Locust)
+      run: |
+        locust -f performance_tests/locustfile.py --headless -u 10 -r 2 --run-time 30s --csv=locust_results
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: |
+          htmlcov/**
+          locust_results*
+          openapi.yaml

@@ -1,0 +1,1 @@
+"""Footprint Manager Notifications app."""

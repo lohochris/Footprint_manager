@@ -1,0 +1,95 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "backend.config.settings.testing"
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+testpaths = ["backend/tests", "backend/apps"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=backend",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-fail-under=0",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow running tests",
+]
+
+[tool.coverage.run]
+source = ["backend"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/__init__.py",
+    "backend/manage.py",
+    "backend/scripts/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    migrations
+    | staticfiles
+    | htmlcov
+    | node_modules
+    | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_django = ["django", "rest_framework"]
+known_first_party = ["config", "common", "shared", "apps"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+skip = ["migrations", "node_modules", ".venv", "venv"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations", "node_modules", "staticfiles", "htmlcov"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "B", "C4", "UP", "ARG", "SIM", "S",
+]
+ignore = [
+    "S101",
+    "S105",
+    "S106",
+    "UP046",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/config/settings/*" = ["F403", "F405"]
+"backend/config/settings/development.py" = ["S104"]
+"backend/tests/*" = ["S101", "ARG"]
+"**/tests/*" = ["S101", "ARG"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+ignore_missing_imports = true
+strict = false
+exclude = ["migrations/", "node_modules/"]
+
+[tool.django-stubs]
+django_settings_module = "backend.config.settings.development"
+
+[tool.bandit]
+exclude_dirs = ["tests", "migrations", "node_modules"]
+skips = ["B101"]
