@@ -18,18 +18,6 @@ class PipelineRegistry:
     requested for an unknown operation.
     """
 
-# Register WorkspaceService operations
-from apps.organizations.services.workspace_service import WorkspaceService
-
-PipelineRegistry.register('workspace.create', lambda **payload: WorkspaceService.create_workspace(**payload))
-PipelineRegistry.register('workspace.update', lambda **payload: WorkspaceService.update_workspace(**payload))
-PipelineRegistry.register('workspace.archive', lambda **payload: WorkspaceService.archive_workspace(**payload))
-PipelineRegistry.register('workspace.restore', lambda **payload: WorkspaceService.restore_workspace(**payload))
-PipelineRegistry.register('workspace.delete', lambda **payload: WorkspaceService.delete_workspace(**payload) if hasattr(WorkspaceService, 'delete_workspace') else None)
-PipelineRegistry.register('workspace.update_settings', lambda **payload: WorkspaceService.update_workspace_settings(**payload))
-PipelineRegistry.register('workspace.change_visibility', lambda **payload: WorkspaceService.change_workspace_visibility(**payload))
-PipelineRegistry.register('workspace.change_status', lambda **payload: WorkspaceService.change_workspace_status(**payload))
-
     _handlers: dict[str, Callable] = {}
 
     @classmethod
@@ -58,3 +46,44 @@ PipelineRegistry.register('workspace.change_status', lambda **payload: Workspace
     def clear(cls) -> None:
         """Clear all registered handlers (useful for test isolation)."""
         cls._handlers.clear()
+
+
+# Register WorkspaceService operations
+from apps.organizations.services.workspace_service import WorkspaceService  # noqa: E402
+
+PipelineRegistry.register(
+    'workspace.create',
+    lambda **payload: WorkspaceService.create_workspace(**payload),
+)
+PipelineRegistry.register(
+    'workspace.update',
+    lambda **payload: WorkspaceService.update_workspace(**payload),
+)
+PipelineRegistry.register(
+    'workspace.archive',
+    lambda **payload: WorkspaceService.archive_workspace(**payload),
+)
+PipelineRegistry.register(
+    'workspace.restore',
+    lambda **payload: WorkspaceService.restore_workspace(**payload),
+)
+PipelineRegistry.register(
+    'workspace.delete',
+    lambda **payload: (
+        WorkspaceService.delete_workspace(**payload)
+        if hasattr(WorkspaceService, 'delete_workspace')
+        else None
+    ),
+)
+PipelineRegistry.register(
+    'workspace.update_settings',
+    lambda **payload: WorkspaceService.update_workspace_settings(**payload),
+)
+PipelineRegistry.register(
+    'workspace.change_visibility',
+    lambda **payload: WorkspaceService.change_workspace_visibility(**payload),
+)
+PipelineRegistry.register(
+    'workspace.change_status',
+    lambda **payload: WorkspaceService.change_workspace_status(**payload),
+)
