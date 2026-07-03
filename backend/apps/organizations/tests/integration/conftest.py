@@ -1,5 +1,5 @@
 import pytest
-from apps.organizations.models import Invitation, Organization, OrganizationMember, Workspace
+from backend.apps.organizations.models import Invitation, Organization, OrganizationMember, Workspace
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken

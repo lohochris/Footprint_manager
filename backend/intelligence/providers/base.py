@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from .provider_metadata import HealthStatus
+from intelligence.provider_state import ProviderLifecycleState
 
 if TYPE_CHECKING:
     from .request import AIRequest
@@ -22,6 +23,15 @@ class AIProvider(ABC):
     implementations raise ``NotImplementedError`` to signal that the provider
     does not support the operation.
     """
+
+    @property
+    def lifecycle_state(self) -> ProviderLifecycleState:
+        """Return the current lifecycle state of this provider."""
+        return getattr(self, "_lifecycle_state", ProviderLifecycleState.ACTIVE)
+
+    @lifecycle_state.setter
+    def lifecycle_state(self, value: ProviderLifecycleState) -> None:
+        self._lifecycle_state = value
 
     @abstractmethod
     def initialize(self) -> None:

@@ -24,15 +24,15 @@ class IntegrationsConfig(AppConfig):
     """Django AppConfig for the integrations package."""
 
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.integrations"
+    name = "backend.apps.integrations"
     verbose_name = "Integrations"
 
     def ready(self) -> None:
         """Validate sub-module availability at startup."""
-        import apps.integrations.claude  # noqa: F401
-        import apps.integrations.elasticsearch  # noqa: F401
-        import apps.integrations.email  # noqa: F401
-        import apps.integrations.kafka  # noqa: F401
-        import apps.integrations.neo4j  # noqa: F401
-        import apps.integrations.openai  # noqa: F401
-        import apps.integrations.storage  # noqa: F401
+        import backend.apps.integrations.claude  # noqa: F401
+        import backend.apps.integrations.elasticsearch  # noqa: F401
+        import backend.apps.integrations.email  # noqa: F401
+        import backend.apps.integrations.kafka  # noqa: F401
+        import backend.apps.integrations.neo4j  # noqa: F401
+        import backend.apps.integrations.openai  # noqa: F401
+        import backend.apps.integrations.storage  # noqa: F401

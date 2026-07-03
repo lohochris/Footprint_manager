@@ -6,7 +6,7 @@ No Django DB, no network calls, no randomness.
 """
 
 import pytest
-from apps.common.pipeline.core import ExecutionResult, Pipeline, PipelineContext
+from backend.apps.common.pipeline.core import ExecutionResult, Pipeline, PipelineContext
 from intelligence.context import ExecutionContext
 from intelligence.engine import AIExecutionEngine
 from intelligence.providers import AIRequest, DummyProvider, ProviderRegistry
@@ -88,7 +88,7 @@ class TestConstruction:
         assert IntelligenceStage.name == "IntelligenceStage"
 
     def test_is_pipeline_stage_subclass(self) -> None:
-        from apps.common.pipeline.core import PipelineStage
+        from backend.apps.common.pipeline.core import PipelineStage
         assert issubclass(IntelligenceStage, PipelineStage)
 
 

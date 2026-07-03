@@ -7,10 +7,14 @@ Contains no business logic, no HTTP calls, no SDKs, and no external dependencies
 
 from __future__ import annotations
 
+import logging
+
 from intelligence.providers.base import AIProvider
 from intelligence.providers.registry import ProviderRegistry
 from intelligence.providers.registry import _registry as _global_registry
 from intelligence.providers.request import AIRequest
+
+logger = logging.getLogger(__name__)
 
 
 class ProviderNotFoundError(Exception):
@@ -84,7 +88,7 @@ class Router:
         )
         if provider_name:
             return self._select_by_name(provider_name)
-        return self._select_by_task(request.task)
+        return self._select_by_task(request)
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -99,19 +103,62 @@ class Router:
             )
         return provider_cls
 
-    def _select_by_task(self, task: str) -> type[AIProvider]:
+    def _select_by_task(self, task_or_req: str | AIRequest) -> type[AIProvider]:
         """Select the highest-priority provider that supports *task*."""
-        candidates = [
-            p for p in self._registry.list()
-            if p().supports(task)
-        ]
+        if isinstance(task_or_req, str):
+            task = task_or_req
+            health_required = True
+        else:
+            task = task_or_req.task
+            from intelligence.policies.policy_builder import ExecutionPolicyBuilder
+            policy = ExecutionPolicyBuilder().build(task_or_req)
+            health_required = policy.health_required
+
+        from intelligence.provider_state import ProviderLifecycleState
+
+        candidates = []
+        for p in self._registry.list():
+            try:
+                provider_inst = p()
+            # Intentional:
+            # Provider instantiation failure is isolated so routing can check other candidates.
+            except Exception:  # nosec B112  # noqa: S112
+                continue
+            if not provider_inst.supports(task):
+                continue
+
+            state = getattr(provider_inst, "lifecycle_state", ProviderLifecycleState.ACTIVE)
+            if state != ProviderLifecycleState.ACTIVE:
+                continue
+
+            if health_required:
+                try:
+                    if not provider_inst.health_check().healthy:
+                        continue
+                # Intentional:
+                # Failing health checks are isolated to allow fallback routing to other candidates.
+                except Exception:  # nosec B112  # noqa: S112
+                    continue
+            candidates.append(p)
+
         if candidates:
             return candidates[0]
 
         # Fallback: registry default (first by priority regardless of task)
-        default = self._registry.default()
-        if default is not None:
-            return default
+        default_cls = self._registry.default()
+        if default_cls is not None:
+            try:
+                default_inst = default_cls()
+                state = getattr(default_inst, "lifecycle_state", ProviderLifecycleState.ACTIVE)
+                if state == ProviderLifecycleState.ACTIVE and (
+                    not health_required or default_inst.health_check().healthy
+                ):
+                    return default_cls
+            except Exception as exc:
+                logger.warning(
+                    "Default provider health check failed during routing fallback: %s",
+                    exc,
+                )
 
         raise NoProviderAvailableError(
             f"No provider available for task '{task}' "

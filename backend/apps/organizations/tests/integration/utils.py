@@ -20,5 +20,5 @@ def assert_paginated(response, expected_count):
 
 def extract_audit_log(entry):
     """Placeholder to retrieve audit log entries for a model instance."""
-    from apps.audit.models import AuditLog
+    from backend.apps.audit.models import AuditLog
     return AuditLog.objects.filter(object_id=entry.id).order_by('-timestamp')

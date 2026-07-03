@@ -10,7 +10,7 @@ import time
 # In production a distributed solution like Redis would be used.
 from collections import defaultdict
 
-from apps.audit.models.audit_log import AuditLog
+from backend.apps.audit.models.audit_log import AuditLog
 from django.db import transaction
 
 from ..models.organization_member import OrganizationMember

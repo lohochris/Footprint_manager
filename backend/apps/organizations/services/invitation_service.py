@@ -7,7 +7,7 @@ import time
 from collections import defaultdict
 from datetime import timedelta
 
-from apps.audit.models.audit_log import AuditLog
+from backend.apps.audit.models.audit_log import AuditLog
 from django.db import transaction
 from django.utils import timezone
 
@@ -21,7 +21,7 @@ from ..validators import (
     validate_no_active_invitation,
 )
 from .base import ServiceError
-from apps.investigations.services.base_service import BaseService
+from backend.apps.investigations.services.base_service import BaseService
 
 # In‑memory rate‑limit for invitation creation (5 per minute per user)
 _RATE_LIMITS = {

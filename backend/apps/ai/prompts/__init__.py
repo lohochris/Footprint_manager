@@ -7,7 +7,7 @@ stored in this module; the prompt registry maps names to active templates.
 
 Usage::
 
-    from apps.ai.prompts import PromptTemplate, registry
+    from backend.apps.ai.prompts import PromptTemplate, registry
 
     template = registry.get("investigation_summary")
     rendered = template.render({"title": "ACME Corp Breach", "findings": "..."})

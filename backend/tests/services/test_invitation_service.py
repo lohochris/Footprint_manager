@@ -1,8 +1,8 @@
 import pytest
 from django.test import TestCase
-from apps.organizations.services.invitation_service import InvitationService
-from apps.organizations.models import Organization, OrganizationMember
-from apps.users.models import User
+from backend.apps.organizations.services.invitation_service import InvitationService
+from backend.apps.organizations.models import Organization, OrganizationMember
+from backend.apps.users.models import User
 
 class InvitationServiceTests(TestCase):
     def setUp(self):

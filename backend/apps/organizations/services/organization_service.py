@@ -6,7 +6,7 @@ ownership of organizations. All mutating operations are logged to the
 """
 
 
-from apps.audit.models.audit_log import AuditLog
+from backend.apps.audit.models.audit_log import AuditLog
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 

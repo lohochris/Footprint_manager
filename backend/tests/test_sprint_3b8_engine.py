@@ -6,7 +6,7 @@ No Django DB, no network calls, no randomness.
 """
 
 import pytest
-from apps.common.pipeline.core import ExecutionResult
+from backend.apps.common.pipeline.core import ExecutionResult
 from intelligence.engine import AIExecutionEngine
 from intelligence.providers import (
     AIRequest,

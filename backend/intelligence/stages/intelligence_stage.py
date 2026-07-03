@@ -8,7 +8,7 @@ and no direct provider communication.
 
 from __future__ import annotations
 
-from apps.common.pipeline.core import PipelineContext, PipelineStage
+from backend.apps.common.pipeline.core import PipelineContext, PipelineStage
 from intelligence.context import ExecutionContext
 from intelligence.engine import AIExecutionEngine
 from intelligence.providers.request import AIRequest

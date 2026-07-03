@@ -4,7 +4,7 @@ Provides transactional ownership transfer for organizations (and optionally work
 All mutating actions are logged to AuditLog with full request context.
 """
 
-from apps.audit.models.audit_log import AuditLog
+from backend.apps.audit.models.audit_log import AuditLog
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
@@ -12,7 +12,7 @@ from ..models.organization import Organization
 from ..models.organization_member import OrganizationMember
 from ..validators import validate_ownership_transfer
 from .base import ServiceError
-from apps.investigations.services.base_service import BaseService
+from backend.apps.investigations.services.base_service import BaseService
 
 
 class OwnershipService:

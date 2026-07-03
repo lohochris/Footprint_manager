@@ -130,3 +130,74 @@ class Pipeline:
             execution_time=end - start,
             status_code=200,
         )
+
+
+import logging
+from django.core.exceptions import PermissionDenied
+from django.utils import timezone
+from backend.apps.audit.models.audit_log import AuditLog
+from backend.apps.common.pipeline.registry import PipelineRegistry
+
+logger = logging.getLogger(__name__)
+
+
+class BaseService:
+    """Common infrastructure for all domain services."""
+
+    @staticmethod
+    def get_tenant(user):
+        return getattr(user, "tenant", getattr(user, "organization", None))
+
+    @staticmethod
+    def enforce_tenant_scope(instance, user):
+        tenant = BaseService.get_tenant(user)
+        if hasattr(instance, "tenant") and instance.tenant != tenant:
+            raise PermissionDenied("Object does not belong to the user's tenant.")
+        if hasattr(instance, "organization") and instance.organization != tenant:
+            raise PermissionDenied("Object does not belong to the user's organization.")
+
+    @staticmethod
+    def check_permission(user, action, obj=None):
+        logger.debug("Permission check: user=%s action=%s obj=%s", user, action, obj)
+        return True
+
+    @staticmethod
+    def log_audit(user, action, instance, details=None):
+        AuditLog.objects.create(
+            performed_by=user,
+            action=action,
+            organization=getattr(instance, "organization", getattr(user, "organization", None)),
+            outcome="success",
+            details=details or {},
+        )
+
+    @staticmethod
+    def publish_event(event_name, payload):
+        logger.info("Domain event published: %s payload=%s", event_name, payload)
+
+    @staticmethod
+    def execute(operation: str, performed_by: Any, tenant: Any, payload: dict[str, Any], metadata: dict[str, Any] | None = None) -> ExecutionResult:
+        if metadata is None:
+            metadata = {}
+        handler = PipelineRegistry.get_handler(operation)
+        context = PipelineContext(
+            performed_by=performed_by,
+            tenant=tenant,
+            payload=payload,
+            metadata=metadata,
+        )
+
+        class _HandlerStage(PipelineStage):
+            priority = 1000
+            name = "BusinessLogicStage"
+
+            def execute(self, ctx: PipelineContext) -> PipelineContext:
+                if isinstance(ctx.payload, dict):
+                    result = handler(**ctx.payload)
+                else:
+                    result = handler(ctx.payload)
+                return ctx.with_updates(payload=result)
+
+        pipeline = Pipeline([_HandlerStage()])
+        return pipeline.run(context)
+

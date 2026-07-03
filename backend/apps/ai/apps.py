@@ -31,15 +31,15 @@ class AiConfig(AppConfig):
     """Django AppConfig for the AI app."""
 
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.ai"
+    name = "backend.apps.ai"
     verbose_name = "AI"
 
     def ready(self) -> None:
         """Validate AI sub-modules are importable at startup."""
-        import apps.ai.embeddings  # noqa: F401
-        import apps.ai.gateway  # noqa: F401
-        import apps.ai.memory  # noqa: F401
-        import apps.ai.prompts  # noqa: F401
-        import apps.ai.providers  # noqa: F401
-        import apps.ai.rag  # noqa: F401
-        import apps.ai.tasks  # noqa: F401
+        import backend.apps.ai.embeddings  # noqa: F401
+        import backend.apps.ai.gateway  # noqa: F401
+        import backend.apps.ai.memory  # noqa: F401
+        import backend.apps.ai.prompts  # noqa: F401
+        import backend.apps.ai.providers  # noqa: F401
+        import backend.apps.ai.rag  # noqa: F401
+        import backend.apps.ai.tasks  # noqa: F401

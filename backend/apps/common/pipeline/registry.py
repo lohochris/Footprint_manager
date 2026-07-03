@@ -49,7 +49,7 @@ class PipelineRegistry:
 
 
 # Register WorkspaceService operations
-from apps.organizations.services.workspace_service import WorkspaceService  # noqa: E402
+from backend.apps.organizations.services.workspace_service import WorkspaceService  # noqa: E402
 
 PipelineRegistry.register(
     'workspace.create',

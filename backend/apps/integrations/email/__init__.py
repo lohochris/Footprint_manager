@@ -7,7 +7,7 @@ are registered via Django settings and selected at runtime.
 
 Usage::
 
-    from apps.integrations.email import EmailBackend, EmailMessage
+    from backend.apps.integrations.email import EmailBackend, EmailMessage
 
     class MyView:
         def __init__(self, email: EmailBackend) -> None:

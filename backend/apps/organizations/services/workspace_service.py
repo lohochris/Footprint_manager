@@ -6,7 +6,7 @@ tenant isolation, role based authorization, and business rules.
 """
 
 
-from apps.audit.models.audit_log import AuditLog
+from backend.apps.audit.models.audit_log import AuditLog
 from django.db import transaction
 
 from backend.shared.constants.roles import (
@@ -28,7 +28,7 @@ from ..validators.workspace import (
     validate_workspace_slug_unique,
 )
 from .base import ServiceError
-from apps.common.pipeline.core import BaseService
+from backend.apps.common.pipeline.core import BaseService
 
 
 class WorkspaceService:

@@ -1,4 +1,4 @@
-from apps.common.pipeline.registry import PipelineRegistry
+from backend.apps.common.pipeline.registry import PipelineRegistry
 
 # Import the original service implementation
 from .services import organization_service as org_srv

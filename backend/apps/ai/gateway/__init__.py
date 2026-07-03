@@ -11,7 +11,7 @@ platform.  It decouples service-layer code from specific LLM providers by:
 
 Usage::
 
-    from apps.ai.gateway import AIGateway, GatewayRequest
+    from backend.apps.ai.gateway import AIGateway, GatewayRequest
 
     gateway: AIGateway = ...  # injected or resolved from settings
 

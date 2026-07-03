@@ -2,10 +2,17 @@
 
 """Top‑level package for the Intelligence enrichment layer.
 
-The package currently exposes the :class:`ExecutionContext` type that will be
-used by future enrichers.  Additional public symbols can be added here as the
-feature set grows.
+The package exposes the execution context, provider states, and policy evaluation
+types used throughout the intelligence execution pipeline.
 """
 
 from .context import ExecutionContext
+from .provider_state import ProviderLifecycleState
+from .policy import PolicyEngine, EvaluationResult
 
+__all__ = [
+    "ExecutionContext",
+    "ProviderLifecycleState",
+    "PolicyEngine",
+    "EvaluationResult",
+]

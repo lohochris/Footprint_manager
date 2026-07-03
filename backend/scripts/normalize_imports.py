@@ -4,7 +4,7 @@
 This script walks through all `.py` files (excluding migrations) and rewrites import statements
 that do not already start with `backend.apps.`. It handles:
 - Absolute imports like `from organizations.models import X`
-- Legacy `apps.` imports like `from apps.organizations.models import X`
+- Legacy `apps.` imports like `from backend.apps.organizations.models import X`
 - Relative imports (e.g. `from ..models import X`)
 
 It uses `libcst` for safe, syntax‑preserving transformations.

@@ -5,5 +5,5 @@ from django.apps import AppConfig
 
 class AuditConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.audit"
+    name = "backend.apps.audit"
     verbose_name = "Audit"

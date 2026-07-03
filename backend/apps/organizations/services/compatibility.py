@@ -5,7 +5,7 @@ Service Execution Pipeline.
 
 from typing import Any
 
-from apps.common.pipeline.core import BaseService
+from backend.apps.common.pipeline.core import BaseService
 
 from .organization_service import OrganizationService as _OriginalService
 

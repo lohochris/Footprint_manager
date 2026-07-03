@@ -1,4 +1,4 @@
-from apps.audit.models import AuditLog
+from backend.apps.audit.models import AuditLog
 from django.db import transaction
 from django.utils import timezone
 

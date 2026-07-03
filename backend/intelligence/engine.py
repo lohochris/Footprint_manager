@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 import time
 
-from apps.common.pipeline.core import ExecutionResult
+from backend.apps.common.pipeline.core import ExecutionResult
 from intelligence.providers.request import AIRequest
 from intelligence.router import NoProviderAvailableError, ProviderNotFoundError, Router
 from shared.constants.feature_flags import ENABLE_AI, is_feature_enabled
@@ -39,6 +39,8 @@ class AIExecutionEngine:
 
     def __init__(self, router: Router | None = None) -> None:
         self._router: Router = router if router is not None else Router()
+        from intelligence.policies.policy_builder import ExecutionPolicyBuilder
+        self._policy_builder = ExecutionPolicyBuilder()
 
     # ------------------------------------------------------------------
     # Public API
@@ -78,18 +80,21 @@ class AIExecutionEngine:
                 success=False,
                 data=None,
                 error="AI execution is disabled (ENABLE_AI=False).",
-                metadata={"ai_enabled": False},
+                metadata={"ai_enabled": False, "diagnostics": {"allowed": False, "reason": "AI execution disabled"}},
                 execution_time=time.monotonic() - start,
                 status_code=503,
             )
 
+        # Build policy
+        policy = self._policy_builder.build(request, dry_run=dry_run)
+
         # ── 2. Dry-run short-circuit ────────────────────────────────────
-        if dry_run:
+        if policy.dry_run:
             return ExecutionResult(
                 success=True,
                 data=None,
                 error=None,
-                metadata={"dry_run": True, "task": request.task},
+                metadata={"dry_run": True, "task": request.task, "diagnostics": {"allowed": True, "dry_run": True}},
                 execution_time=time.monotonic() - start,
                 status_code=200,
             )
@@ -103,38 +108,101 @@ class AIExecutionEngine:
                 success=False,
                 data=None,
                 error=exc,
-                metadata={"task": request.task},
+                metadata={"task": request.task, "diagnostics": {"allowed": False, "routing_error": str(exc)}},
                 execution_time=time.monotonic() - start,
                 status_code=503,
             )
 
-        # ── 4. Provider execution ───────────────────────────────────────
+        # ── 4. Provider Instantiation & Policy evaluation ────────────────
         provider_name: str = getattr(provider_cls, "name", provider_cls.__name__)
         try:
             provider = provider_cls()
-            response = provider.execute(request)
-        except Exception as exc:  # noqa: BLE001
-            logger.error(
-                "Provider '%s' raised an exception for task '%s': %s",
-                provider_name, request.task, exc,
-                exc_info=True,
-            )
+        except Exception as exc:
             return ExecutionResult(
                 success=False,
                 data=None,
                 error=exc,
-                metadata={"provider": provider_name, "task": request.task},
+                metadata={
+                    "provider": provider_name,
+                    "task": request.task,
+                    "diagnostics": {"allowed": False, "instantiation_error": str(exc)},
+                },
                 execution_time=time.monotonic() - start,
                 status_code=500,
             )
 
-        # ── 5. Map AIResponse → ExecutionResult ────────────────────────
-        succeeded = response.status == "success"
+        from intelligence.policy import PolicyEngine
+        policy_engine = PolicyEngine()
+        eval_res = policy_engine.evaluate(request, provider, policy)
+
+        if not eval_res.allowed:
+            return ExecutionResult(
+                success=False,
+                data=None,
+                error=eval_res.reason,
+                metadata={
+                    "provider": provider_name,
+                    "task": request.task,
+                    "diagnostics": eval_res.diagnostics or {"allowed": False, "reason": eval_res.reason},
+                },
+                execution_time=time.monotonic() - start,
+                status_code=400,
+            )
+
+        # ── 5. Provider execution with retries ──────────────────────────
+        attempts = 0
+        max_attempts = policy.max_attempts if policy.retry_enabled else 1
+        last_exc = None
+        response = None
+
+        while attempts < max_attempts:
+            attempts += 1
+            try:
+                response = provider.execute(request)
+                if response.status == "success":
+                    break
+            except Exception as exc:  # noqa: BLE001
+                last_exc = exc
+                logger.error(
+                    "Provider '%s' raised an exception for task '%s' (attempt %d/%d): %s",
+                    provider_name, request.task, attempts, max_attempts, exc,
+                    exc_info=True,
+                )
+
+        # ── 6. Map AIResponse → ExecutionResult ────────────────────────
+        succeeded = response is not None and response.status == "success"
+        diagnostics = {
+            "allowed": True,
+            "attempts": attempts,
+            "provider": provider_name,
+            "lifecycle_state": getattr(provider, "lifecycle_state", "active"),
+            "healthy": True,
+        }
+        if not succeeded:
+            error_val = response.diagnostics if response is not None else last_exc
+            diagnostics["error"] = str(error_val)
+            return ExecutionResult(
+                success=False,
+                data=response,
+                error=error_val,
+                metadata={
+                    "provider": provider_name,
+                    "task": request.task,
+                    "diagnostics": diagnostics,
+                },
+                execution_time=time.monotonic() - start,
+                status_code=502 if response is not None else 500,
+            )
+
         return ExecutionResult(
-            success=succeeded,
+            success=True,
             data=response,
-            error=None if succeeded else response.diagnostics,
-            metadata={"provider": provider_name, "task": request.task},
+            error=None,
+            metadata={
+                "provider": provider_name,
+                "task": request.task,
+                "diagnostics": diagnostics,
+            },
             execution_time=time.monotonic() - start,
-            status_code=200 if succeeded else 502,
+            status_code=200,
         )
