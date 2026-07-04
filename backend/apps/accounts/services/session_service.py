@@ -67,7 +67,7 @@ class SessionService:
         status is set to ``LOGGED_OUT`` and ``logout_time`` is recorded.
         """
         try:
-            session = Session.objects.select_for_update().get(id=session_id)
+            session = Session.objects.select_for_update().get(id=str(session_id))
         except ObjectDoesNotExist:
             raise ObjectDoesNotExist(f"Session {session_id} not found.")
 
@@ -92,7 +92,7 @@ class SessionService:
         active_sessions = Session.objects.select_for_update().filter(
             user=user,
             status=Session.Status.ACTIVE,
-        ).exclude(id=current_session_id)
+        ).exclude(id=str(current_session_id))
 
         now = timezone.now()
         for session in active_sessions:

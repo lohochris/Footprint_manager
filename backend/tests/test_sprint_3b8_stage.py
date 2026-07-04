@@ -9,7 +9,7 @@ import pytest
 from backend.apps.common.pipeline.core import ExecutionResult, Pipeline, PipelineContext
 from backend.intelligence.context import ExecutionContext
 from backend.intelligence.engine import AIExecutionEngine
-from backend.intelligence.providers import AIRequest, DummyProvider, ProviderRegistry
+from backend.intelligence.providers import AIRequest, AIResponse, DummyProvider, ProviderRegistry
 from backend.intelligence.router import Router
 from backend.intelligence.stages import IntelligenceStage
 
@@ -252,7 +252,7 @@ class TestEngineFailureHandling:
 
         class _CrashProvider(DummyProvider):
             name: str = "crash"
-            def execute(self, r: AIRequest) -> None:
+            def execute(self, r: AIRequest) -> AIResponse:
                 raise RuntimeError("boom")
 
         reg.register(_CrashProvider)
@@ -267,7 +267,7 @@ class TestEngineFailureHandling:
 
         class _CrashProvider(DummyProvider):
             name: str = "crash2"
-            def execute(self, r: AIRequest) -> None:
+            def execute(self, r: AIRequest) -> AIResponse:
                 raise ValueError("kaboom")
 
         reg.register(_CrashProvider)

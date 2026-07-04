@@ -29,7 +29,7 @@ class BaseSelector:
     def _base_qs(self) -> QuerySet:
         """Base queryset filtered by tenant.
         """
-        return self.model.objects.filter(**{self.tenant_field: self.tenant_id})
+        return self.model.objects.filter(**{self.tenant_field: self.tenant_id})  # type: ignore[attr-defined]
 
     def list(
         self,

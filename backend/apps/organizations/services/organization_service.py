@@ -6,6 +6,8 @@ ownership of organizations. All mutating operations are logged to the
 """
 
 
+import uuid
+from typing import Union
 from backend.apps.audit.models.audit_log import AuditLog
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -75,7 +77,7 @@ class OrganizationService:
         return organization
 
     @staticmethod
-    def get_organization(user, org_id: int) -> Organization:
+    def get_organization(user, org_id: uuid.UUID | str) -> Organization:
         """Retrieve an organization for a user, enforcing tenant isolation."""
         return get_organization_by_id(user, org_id)
 

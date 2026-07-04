@@ -78,6 +78,8 @@ class UploadEvidenceStorageStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         file_obj = ctx.payload.get("file")
+        if file_obj is None:
+            raise ValidationError("File is required in payload.")
         # Save to storage provider
         # Create a unique path key
         filename = file_obj.name
@@ -98,6 +100,8 @@ class UploadEvidenceHashStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         storage_key = ctx.metadata.get("storage_key")
+        if storage_key is None:
+            raise ValidationError("Storage key is missing in metadata.")
         # Compute SHA-256 hash of stored file
         file_bytes = storage_provider.read(storage_key)
         sha256_hash = hashlib.sha256(file_bytes).hexdigest()
@@ -125,12 +129,12 @@ class UploadEvidenceBusinessStage(PipelineStage):
 
         evidence_file = EvidenceFile.objects.create(
             evidence=evidence,
-            file=ctx.metadata.get("storage_key"),
-            checksum_sha256=ctx.metadata.get("checksum_sha256"),
-            original_filename=ctx.metadata.get("original_filename"),
-            stored_filename=ctx.metadata.get("storage_key"),
-            mime_type=ctx.metadata.get("mime_type"),
-            file_size=ctx.metadata.get("file_size"),
+            file=ctx.metadata["storage_key"],
+            checksum_sha256=ctx.metadata["checksum_sha256"],
+            original_filename=ctx.metadata["original_filename"],
+            stored_filename=ctx.metadata["storage_key"],
+            mime_type=ctx.metadata["mime_type"],
+            file_size=ctx.metadata["file_size"],
             owner=ctx.performed_by,
             tenant_id=ctx.tenant.id,
         )
@@ -163,7 +167,9 @@ class UploadEvidenceAuditStage(PipelineStage):
     name = "UploadAuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        evidence = ctx.payload
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
+        evidence = cast(Evidence, ctx.payload)
         AuditLog.objects.create(
             action="evidence_uploaded",
             performed_by=ctx.performed_by,
@@ -183,7 +189,9 @@ class UploadEvidenceTimelineStage(PipelineStage):
     name = "UploadTimelineStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        evidence = ctx.payload
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
+        evidence = cast(Evidence, ctx.payload)
         investigation_id = ctx.metadata.get("investigation_id")
         if investigation_id:
             try:
@@ -197,7 +205,7 @@ class UploadEvidenceTimelineStage(PipelineStage):
                 InvestigationTimelineEvent.objects.create(
                     investigation=investigation,
                     event_type=TimelineEventType.EVIDENCE_LINKED,
-                    description=f"Evidence '{evidence.title}' uploaded and linked to investigation by {ctx.performed_by.username}.",
+                    description=f"Evidence '{evidence.title}' uploaded and linked to investigation by {ctx.performed_by.email}.",
                 )
             except (ImportError, Exception) as e:
                 logger.warning("Could not link evidence timeline event: %s", e)
@@ -252,8 +260,19 @@ class TransferCustodyBusinessStage(PipelineStage):
     name = "TransferBusinessStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
+        from typing import cast
+        from backend.apps.accounts.models import User
+        from backend.apps.evidence.models import Evidence
+
         evidence = ctx.payload.get("evidence")
         new_custodian = ctx.payload.get("new_custodian")
+        if evidence is None:
+            raise ValidationError("Evidence is required in payload.")
+        if new_custodian is None:
+            raise ValidationError("New custodian is required in payload.")
+
+        evidence = cast(Evidence, evidence)
+        new_custodian = cast(User, new_custodian)
         notes = ctx.payload.get("notes", "")
 
         now = timezone.now()
@@ -277,7 +296,7 @@ class TransferCustodyBusinessStage(PipelineStage):
             event_type="released",
             taken_at=last_event.taken_at if last_event else now,
             released_at=now,
-            notes=f"Released to {new_custodian.username}. {notes}",
+            notes=f"Released to {new_custodian.email}. {notes}",
             owner=ctx.performed_by,
             tenant_id=ctx.tenant.id,
         )
@@ -288,7 +307,7 @@ class TransferCustodyBusinessStage(PipelineStage):
             holder=new_custodian,
             event_type="taken",
             taken_at=now,
-            notes=f"Transferred from {ctx.performed_by.username}. {notes}",
+            notes=f"Transferred from {ctx.performed_by.email}. {notes}",
             owner=ctx.performed_by,
             tenant_id=ctx.tenant.id,
         )
@@ -305,7 +324,9 @@ class TransferCustodyAuditStage(PipelineStage):
     name = "TransferAuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        evidence = ctx.payload
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
+        evidence = cast(Evidence, ctx.payload)
         new_custodian = ctx.metadata.get("new_custodian")
         AuditLog.objects.create(
             action="evidence_custody_transferred",
@@ -314,8 +335,8 @@ class TransferCustodyAuditStage(PipelineStage):
             outcome="success",
             details={
                 "evidence_id": str(evidence.id),
-                "from_user": ctx.performed_by.username,
-                "to_user": new_custodian.username if new_custodian else "unknown",
+                "from_user": ctx.performed_by.email,
+                "to_user": new_custodian.email if new_custodian else "unknown",
             },
         )
         return ctx
@@ -326,7 +347,9 @@ class TransferCustodyTimelineStage(PipelineStage):
     name = "TransferTimelineStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        evidence = ctx.payload
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
+        evidence = cast(Evidence, ctx.payload)
         new_custodian = ctx.metadata.get("new_custodian")
         # Add to timeline of all linked investigations
         try:
@@ -339,7 +362,7 @@ class TransferCustodyTimelineStage(PipelineStage):
                 InvestigationTimelineEvent.objects.create(
                     investigation=ref.investigation,
                     event_type=TimelineEventType.OTHER,
-                    description=f"Evidence '{evidence.title}' custody transferred from {ctx.performed_by.username} to {new_custodian.username if new_custodian else 'unknown'}.",
+                    description=f"Evidence '{evidence.title}' custody transferred from {ctx.performed_by.email} to {new_custodian.email if new_custodian else 'unknown'}.",
                 )
         except (ImportError, Exception) as e:
             logger.warning("Could not create custody transfer timeline event: %s", e)
@@ -371,8 +394,15 @@ class VerifyIntegrityStorageStage(PipelineStage):
     name = "VerifyStorageStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
         evidence = ctx.payload.get("evidence")
+        if evidence is None:
+            raise ValidationError("Evidence is required in payload.")
+        evidence = cast(Evidence, evidence)
         storage_key = evidence.file_meta.file.name
+        if not storage_key:
+            raise ValidationError("Storage key is missing on evidence file.")
         # Read the file
         file_bytes = storage_provider.read(storage_key)
         ctx.metadata["file_bytes"] = file_bytes
@@ -385,6 +415,8 @@ class VerifyIntegrityHashStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         file_bytes = ctx.metadata.get("file_bytes")
+        if file_bytes is None:
+            raise ValidationError("File bytes are required in metadata.")
         # Compute SHA-256
         sha256_hash = hashlib.sha256(file_bytes).hexdigest()
         ctx.metadata["computed_sha256"] = sha256_hash
@@ -396,7 +428,12 @@ class VerifyIntegrityBusinessStage(PipelineStage):
     name = "VerifyBusinessStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
         evidence = ctx.payload.get("evidence")
+        if evidence is None:
+            raise ValidationError("Evidence is required in payload.")
+        evidence = cast(Evidence, evidence)
         computed_hash = ctx.metadata.get("computed_sha256")
         expected_hash = evidence.file_meta.checksum_sha256
 
@@ -424,7 +461,9 @@ class VerifyIntegrityAuditStage(PipelineStage):
     name = "VerifyAuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        evidence = ctx.payload
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
+        evidence = cast(Evidence, ctx.payload)
         passed = ctx.metadata.get("integrity_passed", False)
         AuditLog.objects.create(
             action="evidence_verified",
@@ -446,7 +485,9 @@ class VerifyIntegrityTimelineStage(PipelineStage):
     name = "VerifyTimelineStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        evidence = ctx.payload
+        from typing import cast
+        from backend.apps.evidence.models import Evidence
+        evidence = cast(Evidence, ctx.payload)
         passed = ctx.metadata.get("integrity_passed", False)
         try:
             from backend.apps.investigations.models import (

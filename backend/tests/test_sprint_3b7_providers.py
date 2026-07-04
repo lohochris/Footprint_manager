@@ -250,7 +250,7 @@ class TestProviderRegistry:
             def supports(self, task: str) -> bool:  # noqa: ANN001
                 return False
             def execute(self, request: AIRequest) -> AIResponse:  # noqa: ANN001
-                ...  # type: ignore[return-value]
+                raise NotImplementedError
 
         registry.register(_NamelessDummy)
         assert registry.get("_NamelessDummy") is _NamelessDummy

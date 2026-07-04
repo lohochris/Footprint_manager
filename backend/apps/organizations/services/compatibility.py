@@ -3,7 +3,8 @@
 Service Execution Pipeline.
 """
 
-from typing import Any
+import uuid
+from typing import Any, Union
 
 from backend.apps.common.pipeline.core import BaseService
 
@@ -22,7 +23,7 @@ class OrganizationServiceCompat:
         )
 
     @staticmethod
-    def get_organization(user, org_id: int):
+    def get_organization(user, org_id: uuid.UUID | str):
         # Direct call, no pipeline needed for read‑only operation
         return _OriginalService.get_organization(user, org_id)
 

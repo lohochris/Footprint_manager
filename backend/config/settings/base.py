@@ -60,6 +60,7 @@ LOCAL_APPS = [
     "backend.apps.dashboard",
     "backend.apps.investigations",
     "backend.apps.evidence",
+    "backend.apps.osint",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -67,8 +68,8 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "core.middleware.request_id.RequestIDMiddleware",
-    "core.middleware.correlation_id.CorrelationIDMiddleware",
+    "backend.core.middleware.request_id.RequestIDMiddleware",
+    "backend.core.middleware.correlation_id.CorrelationIDMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -78,7 +79,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "config.urls"
+ROOT_URLCONF = "backend.config.urls"
 
 TEMPLATES = [
     {
@@ -96,8 +97,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"
+WSGI_APPLICATION = "backend.config.wsgi.application"
+ASGI_APPLICATION = "backend.config.asgi.application"
 
 DATABASES = {
     "default": env.db(
@@ -105,6 +106,8 @@ DATABASES = {
         default="postgres://footprint:footprint@localhost:5432/footprint_manager",
     ),
 }
+
+AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from backend.apps.rbac.models import Role
+from backend.apps.organizations.models.organization_member import OrganizationMember
 
 
 class TenantScopedPermission(permissions.BasePermission):
@@ -43,10 +43,10 @@ class RoleBasedPermission(permissions.BasePermission):
         if not organization:
             return False
         try:
-            role = Role.objects.get(user=user, organization=organization)
-        except Role.DoesNotExist:
+            member = OrganizationMember.objects.get(user=user, organization=organization)
+        except OrganizationMember.DoesNotExist:
             return False
-        return role.name in self.allowed_roles
+        return member.role in self.allowed_roles
 
 
 class OwnerOrAdminPermission(permissions.BasePermission):
@@ -71,10 +71,10 @@ class OwnerOrAdminPermission(permissions.BasePermission):
         if not organization:
             return False
         try:
-            role = Role.objects.get(user=user, organization=organization)
-        except Role.DoesNotExist:
+            member = OrganizationMember.objects.get(user=user, organization=organization)
+        except OrganizationMember.DoesNotExist:
             return False
-        return role.name == self.admin_role_name
+        return member.role == self.admin_role_name
 
 
 class ReadOnlyPermission(permissions.BasePermission):

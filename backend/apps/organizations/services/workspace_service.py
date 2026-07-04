@@ -6,6 +6,8 @@ tenant isolation, role based authorization, and business rules.
 """
 
 
+import uuid
+from typing import Union
 from backend.apps.audit.models.audit_log import AuditLog
 from django.db import transaction
 
@@ -90,18 +92,18 @@ class WorkspaceService:
             tenant=organization,
             payload=payload,
         )
-        return result.payload
+        return result.data
 
     # ---------------------------------------------------------------------
     # Retrieval
     # ---------------------------------------------------------------------
     @staticmethod
-    def get_workspace(user, workspace_id: int) -> Workspace:
+    def get_workspace(user, workspace_id: uuid.UUID | str) -> Workspace:
         """Retrieve a workspace ensuring tenant isolation."""
         return get_workspace_by_id(user, workspace_id)
 
     @staticmethod
-    def list_organization_workspaces(user, organization_id: int):
+    def list_organization_workspaces(user, organization_id: uuid.UUID | str):
         """Return all workspaces belonging to an organization the user can access."""
         return list_workspaces_for_organization(user, organization_id)
 
@@ -122,7 +124,7 @@ class WorkspaceService:
             tenant=workspace.organization,
             payload=payload,
         )
-        return result.payload
+        return result.data
 
     # ---------------------------------------------------------------------
     # Archive / Restore
@@ -140,7 +142,7 @@ class WorkspaceService:
             tenant=workspace.organization,
             payload=payload,
         )
-        return result.payload
+        return result.data
 
     @staticmethod
     def restore_workspace(workspace: Workspace, user) -> Workspace:
@@ -155,7 +157,7 @@ class WorkspaceService:
             tenant=workspace.organization,
             payload=payload,
         )
-        return result.payload
+        return result.data
 
     # ---------------------------------------------------------------------
     # Settings
@@ -173,7 +175,7 @@ class WorkspaceService:
             tenant=workspace.organization,
             payload=payload,
         )
-        return result.payload
+        return result.data
 
     # ---------------------------------------------------------------------
     # Visibility / Status
@@ -191,7 +193,7 @@ class WorkspaceService:
             tenant=workspace.organization,
             payload=payload,
         )
-        return result.payload
+        return result.data
 
     @staticmethod
     def change_workspace_status(workspace: Workspace, user, status: str) -> Workspace:
@@ -203,4 +205,4 @@ class WorkspaceService:
             tenant=workspace.organization,
             payload=payload,
         )
-        return result.payload
+        return result.data

@@ -102,7 +102,8 @@ class CreateInvestigationAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigation_created",
             performed_by=ctx.performed_by,
@@ -121,7 +122,8 @@ class CreateInvestigationTimelineStage(PipelineStage):
     name = "TimelineStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         InvestigationTimelineEvent.objects.create(
             investigation=investigation,
             event_type=TimelineEventType.CREATED,
@@ -140,6 +142,10 @@ class UpdateInvestigationValidationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         data = ctx.payload.get("data", {})
 
         if "status" in data:
@@ -160,6 +166,10 @@ class UpdateInvestigationAuthorizationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         # Leads and Owners can update details
         _enforce_role_access(
             investigation,
@@ -188,7 +198,8 @@ class UpdateInvestigationAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigation_updated",
             performed_by=ctx.performed_by,
@@ -213,6 +224,10 @@ class AssignMembersValidationStage(PipelineStage):
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         # Tenancy checks
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         from django.contrib.auth import get_user_model
         User = get_user_model()
         investigators = User.objects.filter(pk__in=ctx.payload.get("investigator_ids", []))
@@ -229,6 +244,10 @@ class AssignMembersAuthorizationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         _enforce_role_access(
             investigation,
             ctx.performed_by,
@@ -256,7 +275,8 @@ class AssignMembersAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigators_assigned",
             performed_by=ctx.performed_by,
@@ -275,7 +295,8 @@ class AssignMembersTimelineStage(PipelineStage):
     name = "TimelineStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         # Log to timeline
         InvestigationTimelineEvent.objects.create(
             investigation=investigation,
@@ -295,7 +316,13 @@ class ChangeStatusValidationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         new_status = ctx.payload.get("new_status")
+        if new_status is None:
+            raise ValidationError("New status is required in payload.")
         validate_status_transition(investigation.status, new_status)
         return ctx
 
@@ -306,6 +333,10 @@ class ChangeStatusAuthorizationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         # Owner, lead, or active analyst can change status
         _enforce_role_access(
             investigation,
@@ -334,7 +365,8 @@ class ChangeStatusAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigation_status_changed",
             performed_by=ctx.performed_by,
@@ -354,7 +386,8 @@ class ChangeStatusTimelineStage(PipelineStage):
     name = "TimelineStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         InvestigationTimelineEvent.objects.create(
             investigation=investigation,
             event_type=TimelineEventType.STATUS_CHANGED,
@@ -381,6 +414,10 @@ class ArchiveAuthorizationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         _enforce_role_access(
             investigation,
             ctx.performed_by,
@@ -407,7 +444,8 @@ class ArchiveAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigation_archived",
             performed_by=ctx.performed_by,
@@ -431,6 +469,10 @@ class RestoreValidationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         if not investigation.is_archived:
             raise ValidationError("Investigation is not archived.")
         return ctx
@@ -442,6 +484,10 @@ class RestoreAuthorizationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         _enforce_role_access(
             investigation,
             ctx.performed_by,
@@ -468,7 +514,8 @@ class RestoreAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigation_restored",
             performed_by=ctx.performed_by,
@@ -500,6 +547,10 @@ class SoftDeleteAuthorizationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         _enforce_role_access(
             investigation,
             ctx.performed_by,
@@ -526,7 +577,8 @@ class SoftDeleteAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigation_deleted",
             performed_by=ctx.performed_by,
@@ -550,6 +602,10 @@ class TransferOwnershipValidationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         new_owner = ctx.payload.get("new_owner")
         validate_ownership_transfer(investigation, investigation.owner, new_owner)
         return ctx
@@ -561,6 +617,10 @@ class TransferOwnershipAuthorizationStage(PipelineStage):
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         investigation = ctx.payload.get("investigation")
+        if investigation is None:
+            raise ValidationError("Investigation is required in payload.")
+        from typing import cast
+        investigation = cast(Investigation, investigation)
         if investigation.owner != ctx.performed_by:
             raise PermissionDenied("Only the current owner can transfer ownership of this investigation.")
         return ctx
@@ -585,7 +645,8 @@ class TransferOwnershipAuditStage(PipelineStage):
     name = "AuditStage"
 
     def execute(self, ctx: PipelineContext) -> PipelineContext:
-        investigation = ctx.payload
+        from typing import cast
+        investigation = cast(Investigation, ctx.payload)
         AuditLog.objects.create(
             action="investigation_ownership_transferred",
             performed_by=ctx.performed_by,

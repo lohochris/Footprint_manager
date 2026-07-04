@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from backend.apps.rbac.models import Role
+from backend.apps.organizations.models.organization_member import OrganizationMember
 
 
 class IsInvestigationOwnerOrLeadOrAdmin(permissions.BasePermission):
@@ -26,12 +26,12 @@ class IsInvestigationOwnerOrLeadOrAdmin(permissions.BasePermission):
         # Role-based check within the organization (tenant)
         organization = obj.organization
         try:
-            role = Role.objects.get(user=user, organization=organization)
-        except Role.DoesNotExist:
+            member = OrganizationMember.objects.get(user=user, organization=organization)
+        except OrganizationMember.DoesNotExist:
             return False
         # Define privileged role names in a constant (adjust as needed)
         privileged_roles = {"admin", "manager", "investigation_admin"}
-        return role.name in privileged_roles
+        return member.role in privileged_roles
 
 class CanArchiveRestore(permissions.BasePermission):
     """Only owners or organization admins may archive/restore investigations."""
@@ -46,7 +46,7 @@ class CanArchiveRestore(permissions.BasePermission):
             return True
         # Organization admin check
         try:
-            role = Role.objects.get(user=user, organization=obj.organization)
-        except Role.DoesNotExist:
+            member = OrganizationMember.objects.get(user=user, organization=obj.organization)
+        except OrganizationMember.DoesNotExist:
             return False
-        return role.name == "admin"
+        return member.role == "admin"

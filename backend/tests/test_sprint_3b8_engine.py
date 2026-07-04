@@ -228,7 +228,6 @@ class TestProviderFailureResponse:
                 return MockProvider
 
         engine = AIExecutionEngine(router=_FixedMockRouter(registry=reg))
-        original_execute = engine.execute
 
         def patched_execute(
             req: AIRequest, *, dry_run: bool = False
@@ -243,7 +242,7 @@ class TestProviderFailureResponse:
 
             reg2.register(_ScenarioCls)
             e = AIExecutionEngine(router=Router(registry=reg2))
-            return original_execute.__func__(e, req, dry_run=dry_run)
+            return AIExecutionEngine.execute(e, req, dry_run=dry_run)
 
         return engine
 

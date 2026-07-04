@@ -7,5 +7,5 @@ class CoreConfig(AppConfig):
     """Core infrastructure app configuration."""
 
     default_auto_field = "django.db.models.BigAutoField"
-    name = "core"
+    name = "backend.core"
     verbose_name = "Core"

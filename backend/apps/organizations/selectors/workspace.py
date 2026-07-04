@@ -4,13 +4,14 @@ All selectors enforce that the requesting user belongs to the organization that
 owns the workspace.
 """
 
-from django.contrib.auth import get_user_model
+import uuid
+from typing import Union
 from django.core.exceptions import PermissionDenied
 
+from backend.apps.accounts.models.user import User
 from ..models.organization_member import OrganizationMember
 from ..models.workspace import Workspace
-
-User = get_user_model()
+from ..models.workspace_member import WorkspaceMember
 
 
 def get_user_workspace_membership(user: User, workspace_id):
@@ -44,7 +45,7 @@ def list_workspaces_for_user(user: User):
     return Workspace.objects.filter(organization__members__user=user).distinct()
 
 
-def list_workspaces_for_organization(user: User, organization_id: int):
+def list_workspaces_for_organization(user: User, organization_id: uuid.UUID | str):
     """Return a ``QuerySet`` of workspaces for the given organization if the user is a member.
 
     Raises PermissionDenied if the user does not belong to the organization.

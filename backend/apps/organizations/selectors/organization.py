@@ -5,12 +5,12 @@ or has appropriate ownership rights. They return QuerySets or model instances
 without performing any write operations.
 """
 
-from django.contrib.auth import get_user_model
+import uuid
+from typing import Union
 from django.core.exceptions import PermissionDenied
 
+from backend.apps.accounts.models.user import User
 from ..models import Organization, OrganizationMember
-
-User = get_user_model()
 
 
 def get_user_organization_membership(user: User, organization_id) -> OrganizationMember:
@@ -26,7 +26,7 @@ def get_user_organization_membership(user: User, organization_id) -> Organizatio
         raise PermissionDenied("User is not a member of this organization.")
 
 
-def get_organization_by_id(user: User, org_id: int) -> Organization:
+def get_organization_by_id(user: User, org_id: uuid.UUID | str) -> Organization:
     """Retrieve an organization ensuring tenant isolation.
 
     The caller must be a member of the organization; otherwise ``PermissionDenied``
