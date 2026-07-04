@@ -8,7 +8,8 @@ from backend.apps.organizations.models import Organization, Workspace
 
 @pytest.fixture
 def org(db):
-    return Organization.objects.create(name='Test Org')
+    owner = get_user_model().objects.create(username='org_owner')
+    return Organization.objects.create(name='Test Org', slug='test-org', owner=owner)
 
 @pytest.fixture
 def workspace(db, org):

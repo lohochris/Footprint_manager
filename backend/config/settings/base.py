@@ -8,7 +8,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
-from core.logging.setup import configure_structlog
+from backend.core.logging.setup import configure_structlog
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -59,6 +59,7 @@ LOCAL_APPS = [
     "backend.apps.notifications",
     "backend.apps.dashboard",
     "backend.apps.investigations",
+    "backend.apps.evidence",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -220,6 +221,10 @@ SPECTACULAR_SETTINGS = {
     },
     "REDOC_UI_SETTINGS": {
         "hideDownloadButton": False,
+    },
+    "ENUM_NAME_OVERRIDES": {
+        "EvidenceStatusEnum": "backend.apps.evidence.models.evidence.Evidence.STATUS_CHOICES",
+        "InvestigationStatusEnum": "backend.apps.investigations.models.enums.InvestigationStatus",
     },
 }
 

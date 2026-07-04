@@ -8,7 +8,7 @@ packages; only truly global values live here.
 
 from __future__ import annotations
 
-from shared.constants.feature_flags import (
+from backend.shared.constants.feature_flags import (
     ENABLE_AI,
     ENABLE_COMPLIANCE,
     ENABLE_DISCOVERY,

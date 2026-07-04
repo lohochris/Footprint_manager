@@ -7,11 +7,11 @@ No Django DB, no network calls, no randomness.
 
 import pytest
 from backend.apps.common.pipeline.core import ExecutionResult, Pipeline, PipelineContext
-from intelligence.context import ExecutionContext
-from intelligence.engine import AIExecutionEngine
-from intelligence.providers import AIRequest, DummyProvider, ProviderRegistry
-from intelligence.router import Router
-from intelligence.stages import IntelligenceStage
+from backend.intelligence.context import ExecutionContext
+from backend.intelligence.engine import AIExecutionEngine
+from backend.intelligence.providers import AIRequest, DummyProvider, ProviderRegistry
+from backend.intelligence.router import Router
+from backend.intelligence.stages import IntelligenceStage
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -46,18 +46,18 @@ def make_engine_with_dummy(*, ai_enabled: bool = True) -> AIExecutionEngine:
 @pytest.fixture()
 def enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch both flag checks so ENABLE_AI=True everywhere."""
-    monkeypatch.setattr("intelligence.engine.is_feature_enabled", lambda _: True)
+    monkeypatch.setattr("backend.intelligence.engine.is_feature_enabled", lambda _: True)
     monkeypatch.setattr(
-        "intelligence.stages.intelligence_stage.is_feature_enabled", lambda _: True
+        "backend.intelligence.stages.intelligence_stage.is_feature_enabled", lambda _: True
     )
 
 
 @pytest.fixture()
 def disabled(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch both flag checks so ENABLE_AI=False everywhere."""
-    monkeypatch.setattr("intelligence.engine.is_feature_enabled", lambda _: False)
+    monkeypatch.setattr("backend.intelligence.engine.is_feature_enabled", lambda _: False)
     monkeypatch.setattr(
-        "intelligence.stages.intelligence_stage.is_feature_enabled", lambda _: False
+        "backend.intelligence.stages.intelligence_stage.is_feature_enabled", lambda _: False
     )
 
 
@@ -142,9 +142,9 @@ class TestFeatureFlagGuard:
     ) -> None:
         """intelligence_enabled=True skips the flag check in the stage."""
         monkeypatch.setattr(
-            "intelligence.stages.intelligence_stage.is_feature_enabled", lambda _: False
+            "backend.intelligence.stages.intelligence_stage.is_feature_enabled", lambda _: False
         )
-        monkeypatch.setattr("intelligence.engine.is_feature_enabled", lambda _: True)
+        monkeypatch.setattr("backend.intelligence.engine.is_feature_enabled", lambda _: True)
         stage = make_stage()
         ctx = make_context(intelligence_enabled=True)
         result_ctx = stage.execute(ctx)

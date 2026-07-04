@@ -130,3 +130,8 @@ cache/
 # Logs
 logs/
 *.log
+# Local database
+backend/test.sqlite3
+
+# Generated OpenAPI schema
+schema.yml

@@ -6,7 +6,7 @@ codes when validation fails. They are used exclusively by
 """
 
 from ..models.workspace import Workspace
-from ..services.base import ServiceError  # Import ServiceError from shared services base
+from ..services.base import ServiceError  # Import ServiceError from backend.shared services base
 
 
 def validate_workspace_slug_unique(name: str, slug: str, organization) -> None:

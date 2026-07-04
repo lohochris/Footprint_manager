@@ -13,7 +13,7 @@ SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-from core.logging.setup import configure_structlog  # noqa: E402
+from backend.core.logging.setup import configure_structlog  # noqa: E402
 
 configure_structlog(log_level=LOG_LEVEL, json_logs=True)  # noqa: F405
 

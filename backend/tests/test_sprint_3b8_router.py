@@ -6,14 +6,14 @@ No Django DB, no network calls, no randomness.
 """
 
 import pytest
-from intelligence.providers import (
+from backend.intelligence.providers import (
     AIRequest,
     DummyProvider,
     EchoProvider,
     MockProvider,
     ProviderRegistry,
 )
-from intelligence.router import NoProviderAvailableError, ProviderNotFoundError, Router
+from backend.intelligence.router import NoProviderAvailableError, ProviderNotFoundError, Router
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -61,7 +61,7 @@ def router(populated_registry: ProviderRegistry) -> Router:
 class TestRouterConstruction:
     def test_default_registry_is_global_singleton(self) -> None:
         """Router() with no argument uses the global _registry singleton."""
-        from intelligence.providers.registry import _registry
+        from backend.intelligence.providers.registry import _registry
         r = Router()
         assert r._registry is _registry
 
@@ -70,7 +70,7 @@ class TestRouterConstruction:
         assert r._registry is isolated_registry
 
     def test_none_registry_falls_back_to_global(self) -> None:
-        from intelligence.providers.registry import _registry
+        from backend.intelligence.providers.registry import _registry
         r = Router(registry=None)
         assert r._registry is _registry
 
@@ -228,7 +228,7 @@ class TestReturnType:
         result = router.select(req)
         assert isinstance(result, type)
         assert issubclass(result, __import__(
-            'intelligence.providers.base', fromlist=['AIProvider']
+            'backend.intelligence.providers.base', fromlist=['AIProvider']
         ).AIProvider)
 
     def test_returned_class_is_instantiable(self, router: Router) -> None:

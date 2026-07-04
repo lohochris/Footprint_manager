@@ -15,7 +15,7 @@ search technology, enabling seamless backend swaps.
 
 Usage::
 
-    from shared.search import SearchBackend, SearchQuery, SearchResult
+    from backend.shared.search import SearchBackend, SearchQuery, SearchResult
 
     def search_investigations(
         backend: SearchBackend,

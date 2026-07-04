@@ -1,7 +1,7 @@
 """Test model mixin definitions."""
 
-from common.models import BaseModel, SoftDeleteModel, TenantAwareMixin, TimestampMixin, UUIDMixin
-from core.models import BaseModel as CoreBaseModel
+from backend.common.models import BaseModel, SoftDeleteModel, TenantAwareMixin, TimestampMixin, UUIDMixin
+from backend.core.models import BaseModel as CoreBaseModel
 from django.db import models
 
 

@@ -8,7 +8,7 @@ Provides:
 
 Usage::
 
-    from shared.pagination import FootprintPageNumberPagination, PagedResult
+    from backend.shared.pagination import FootprintPageNumberPagination, PagedResult
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ from typing import Any, Generic, TypeVar
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.request import Request
 from rest_framework.response import Response
-from shared.constants import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from backend.shared.constants import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 
 T = TypeVar("T")
 

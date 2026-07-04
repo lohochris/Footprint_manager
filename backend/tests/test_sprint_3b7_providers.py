@@ -10,7 +10,7 @@ from dataclasses import FrozenInstanceError
 from datetime import datetime
 
 import pytest
-from intelligence.providers import (
+from backend.intelligence.providers import (
     AIProvider,
     AIRequest,
     AIResponse,
@@ -24,7 +24,7 @@ from intelligence.providers import (
     ProviderRegistry,
     register_provider,
 )
-from intelligence.providers.registry import get_provider, list_providers
+from backend.intelligence.providers.registry import get_provider, list_providers
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -282,19 +282,19 @@ class TestGlobalRegistry:
         assert list_providers() == list_providers()
 
     def test_global_registry_capabilities_dummy(self) -> None:
-        from intelligence.providers.registry import _registry
+        from backend.intelligence.providers.registry import _registry
         caps = _registry.capabilities("dummy")
         assert "text" in caps
         assert "chat" in caps
 
     def test_global_registry_capabilities_mock(self) -> None:
-        from intelligence.providers.registry import _registry
+        from backend.intelligence.providers.registry import _registry
         caps = _registry.capabilities("mock")
         assert "text" in caps
         assert "structured_output" in caps
 
     def test_global_registry_capabilities_echo(self) -> None:
-        from intelligence.providers.registry import _registry
+        from backend.intelligence.providers.registry import _registry
         assert _registry.capabilities("echo") == ["text"]
 
     def test_duplicate_registration_still_rejected_globally(self) -> None:
@@ -655,55 +655,55 @@ class TestEchoProvider:
 
 class TestPackageExports:
     def test_ai_provider_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.AIProvider is AIProvider
 
     def test_ai_request_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.AIRequest is AIRequest
 
     def test_ai_response_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.AIResponse is AIResponse
 
     def test_provider_capabilities_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.ProviderCapabilities is ProviderCapabilities
 
     def test_provider_metadata_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.ProviderMetadata is ProviderMetadata
 
     def test_health_status_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.HealthStatus is HealthStatus
 
     def test_dummy_provider_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.DummyProvider is DummyProvider
 
     def test_mock_provider_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.MockProvider is MockProvider
 
     def test_mock_scenario_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.MockScenario is MockScenario
 
     def test_echo_provider_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.EchoProvider is EchoProvider
 
     def test_provider_registry_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert pkg.ProviderRegistry is ProviderRegistry
 
     def test_register_provider_exported(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         assert callable(pkg.register_provider)
 
     def test_all_list_contains_expected_names(self) -> None:
-        import intelligence.providers as pkg
+        import backend.intelligence.providers as pkg
         expected = {
             "AIProvider", "AIRequest", "AIResponse",
             "ProviderCapabilities", "ProviderMetadata", "HealthStatus",

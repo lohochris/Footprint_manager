@@ -14,8 +14,8 @@ Design:
 
 Usage::
 
-    from shared.event_bus import EventDispatcher, EventHandler, InProcessEventDispatcher
-    from shared.events import BaseDomainEvent
+    from backend.shared.event_bus import EventDispatcher, EventHandler, InProcessEventDispatcher
+    from backend.shared.events import BaseDomainEvent
 
     class AuditHandler(EventHandler[BaseDomainEvent]):
         def handle(self, event):
@@ -32,7 +32,7 @@ import abc
 import logging
 from typing import Generic, TypeVar
 
-from shared.events import BaseDomainEvent
+from backend.shared.events import BaseDomainEvent
 
 logger = logging.getLogger(__name__)
 

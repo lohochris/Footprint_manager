@@ -203,25 +203,25 @@ class InvitationService:
 # ---------------------------------------------------------------------------
 
 def invitation_create(**payload):
-    """Wrapper for InvitationService._invite_user_impl."""
-    return InvitationService._invite_user_impl(**payload)
+    """Wrapper for _invite_user_impl."""
+    return _invite_user_impl(**payload)
 
 def invitation_accept(**payload):
-    """Wrapper for InvitationService._accept_invitation_impl."""
-    return InvitationService._accept_invitation_impl(**payload)
+    """Wrapper for _accept_invitation_impl."""
+    return _accept_invitation_impl(**payload)
 
 def invitation_reject(**payload):
-    """Wrapper for InvitationService._reject_invitation_impl."""
-    return InvitationService._reject_invitation_impl(**payload)
+    """Wrapper for _reject_invitation_impl."""
+    return _reject_invitation_impl(**payload)
 
 def invitation_cancel(**payload):
-    """Wrapper for InvitationService._cancel_invitation_impl."""
-    return InvitationService._cancel_invitation_impl(**payload)
+    """Wrapper for _cancel_invitation_impl."""
+    return _cancel_invitation_impl(**payload)
 
 def invitation_resend(**payload):
-    """Wrapper for InvitationService._resend_invitation_impl."""
-    return InvitationService._resend_invitation_impl(**payload)
+    """Wrapper for _resend_invitation_impl."""
+    return _resend_invitation_impl(**payload)
 
 def invitation_expire(**payload):
-    """Wrapper for InvitationService._expire_stale_invitations_impl."""
-    return InvitationService._expire_stale_invitations_impl()
+    """Wrapper for _expire_stale_invitations_impl."""
+    return _expire_stale_invitations_impl()

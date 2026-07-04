@@ -10,7 +10,7 @@ Naming convention: events are named in the past tense (e.g.
 
 Usage::
 
-    from shared.events import BaseDomainEvent
+    from backend.shared.events import BaseDomainEvent
     from dataclasses import dataclass
 
     @dataclass(frozen=True)

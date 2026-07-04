@@ -10,9 +10,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from intelligence.policies.execution_policy import ExecutionPolicy
-from intelligence.providers.request import AIRequest
-from shared.constants.feature_flags import ENABLE_AI, get_feature_flags
+from backend.intelligence.policies.execution_policy import ExecutionPolicy
+from backend.intelligence.providers.request import AIRequest
+from backend.shared.constants.feature_flags import ENABLE_AI, get_feature_flags
 
 
 class ExecutionPolicyBuilder:

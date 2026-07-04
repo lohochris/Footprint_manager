@@ -15,7 +15,7 @@ Concrete backend implementations will be added in future sprints.
 
 from __future__ import annotations
 
-from shared.storage import StorageBackend, StoredFile
+from backend.shared.storage import StorageBackend, StoredFile
 
 __all__ = [
     "StorageBackend",

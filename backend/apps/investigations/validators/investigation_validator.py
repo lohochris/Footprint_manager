@@ -1,18 +1,13 @@
-
 from django.core.exceptions import ValidationError
+from backend.apps.organizations.models import OrganizationMember
 
-# ---------- Status Transition Validation ----------
 
 STATUS_TRANSITIONS = {
-    "draft": ["open", "archived"],
-    "open": ["in_progress", "on_hold", "closed", "archived"],
-    "in_progress": ["on_hold", "completed", "closed", "archived"],
-    "on_hold": ["in_progress", "closed", "archived"],
-    "escalated": ["in_progress", "closed", "archived"],
-    "under_review": ["completed", "closed", "archived"],
-    "completed": ["closed", "archived"],
-    "closed": [],
-    "archived": [],
+    "draft": ["active", "archived"],
+    "active": ["suspended", "completed", "archived"],
+    "suspended": ["active", "archived"],
+    "completed": ["archived"],
+    "archived": [],  # Restoring from archived is a dedicated restore operation
 }
 
 
@@ -29,8 +24,6 @@ def validate_status_transition(current: str, target: str) -> None:
         )
 
 
-# ---------- Priority Validation ----------
-
 ALLOWED_PRIORITIES = {"critical", "high", "medium", "low"}
 
 
@@ -38,8 +31,6 @@ def validate_priority(value: str) -> None:
     if value not in ALLOWED_PRIORITIES:
         raise ValidationError(f"Invalid priority '{value}'. Must be one of {ALLOWED_PRIORITIES}.")
 
-
-# ---------- Tag Validation ----------
 
 def validate_tags(tags: list[str]) -> None:
     if not isinstance(tags, list):
@@ -50,5 +41,32 @@ def validate_tags(tags: list[str]) -> None:
         if len(tag) > 50:
             raise ValidationError("Tag length must not exceed 50 characters.")
 
-"""Utility validators for Investigation domain. All functions are side‑effect free.
-"""
+
+def validate_investigation_tenancy(organization, user, workspace=None) -> None:
+    """Ensure the user belongs to the organization and the workspace aligns with it."""
+    is_member = OrganizationMember.objects.filter(
+        organization=organization,
+        user=user,
+        status="active"
+    ).exists()
+
+    if not is_member:
+        raise ValidationError(f"User is not an active member of organization '{organization.name}'.")
+
+    if workspace and workspace.organization != organization:
+        raise ValidationError(f"Workspace '{workspace.name}' does not belong to organization '{organization.name}'.")
+
+
+def validate_ownership_transfer(investigation, current_owner, new_owner) -> None:
+    """Validate ownership transfer rules."""
+    if new_owner == current_owner:
+        raise ValidationError("Cannot transfer ownership to the current owner.")
+
+    new_owner_is_member = OrganizationMember.objects.filter(
+        organization=investigation.organization,
+        user=new_owner,
+        status="active"
+    ).exists()
+
+    if not new_owner_is_member:
+        raise ValidationError("New owner must be an active member of the organization.")

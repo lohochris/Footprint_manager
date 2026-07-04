@@ -7,7 +7,7 @@ re-definitions and makes refactoring easier.
 
 Usage::
 
-    from shared.types import UUID4, ISODatetime, JSONDict, PositiveInt
+    from backend.shared.types import UUID4, ISODatetime, JSONDict, PositiveInt
 """
 
 from __future__ import annotations

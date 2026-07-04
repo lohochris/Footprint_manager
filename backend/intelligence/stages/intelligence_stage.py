@@ -9,10 +9,10 @@ and no direct provider communication.
 from __future__ import annotations
 
 from backend.apps.common.pipeline.core import PipelineContext, PipelineStage
-from intelligence.context import ExecutionContext
-from intelligence.engine import AIExecutionEngine
-from intelligence.providers.request import AIRequest
-from shared.constants.feature_flags import ENABLE_AI, is_feature_enabled
+from backend.intelligence.context import ExecutionContext
+from backend.intelligence.engine import AIExecutionEngine
+from backend.intelligence.providers.request import AIRequest
+from backend.shared.constants.feature_flags import ENABLE_AI, is_feature_enabled
 
 
 class IntelligenceStage(PipelineStage):

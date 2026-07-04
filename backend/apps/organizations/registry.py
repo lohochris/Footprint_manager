@@ -52,6 +52,7 @@ PipelineRegistry.register('invitation.accept', invitation_accept)
 PipelineRegistry.register('invitation.reject', invitation_reject)
 PipelineRegistry.register('invitation.cancel', invitation_cancel)
 PipelineRegistry.register('invitation.resend', invitation_resend)
+PipelineRegistry.register('invitation.expire', invitation_expire)
 PipelineRegistry.register('ownership.transfer', ownership_transfer)
 
 # Trigger registration at import time.

@@ -8,7 +8,7 @@ Celery tasks, and DRF serializers alike.
 
 Usage::
 
-    from shared.validators import validate_email, validate_uuid
+    from backend.shared.validators import validate_email, validate_uuid
 
     clean_email = validate_email("User@Example.COM")  # returns "user@example.com"
     validate_uuid("not-a-uuid")                       # raises ValidationError
@@ -20,7 +20,7 @@ import re
 import uuid
 from typing import Any
 
-from shared.exceptions import ValidationError
+from backend.shared.exceptions import ValidationError
 
 # ---------------------------------------------------------------------------
 # Regular expression patterns

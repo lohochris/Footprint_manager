@@ -1,10 +1,10 @@
 """Policy engine for evaluating AI execution requests."""
 
 from typing import NamedTuple, Any, Dict
-from intelligence.policies.execution_policy import ExecutionPolicy
-from intelligence.providers.base import AIProvider
-from intelligence.providers.request import AIRequest
-from intelligence.provider_state import ProviderLifecycleState
+from backend.intelligence.policies.execution_policy import ExecutionPolicy
+from backend.intelligence.providers.base import AIProvider
+from backend.intelligence.providers.request import AIRequest
+from backend.intelligence.provider_state import ProviderLifecycleState
 
 class EvaluationResult(NamedTuple):
     allowed: bool

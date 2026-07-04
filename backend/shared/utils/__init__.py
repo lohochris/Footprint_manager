@@ -7,7 +7,7 @@ utilities (Django ORM, DRF, Celery) belong in their respective app packages.
 
 Usage::
 
-    from shared.utils import slugify_safe, truncate_str, deep_merge
+    from backend.shared.utils import slugify_safe, truncate_str, deep_merge
 """
 
 from __future__ import annotations

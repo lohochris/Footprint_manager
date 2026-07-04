@@ -1,24 +1,24 @@
 import pytest
-from intelligence.provider_state import ProviderLifecycleState
-from intelligence.policy import PolicyEngine
-from intelligence.policies.execution_policy import ExecutionPolicy
-from intelligence.providers.base import AIProvider
-from intelligence.providers.request import AIRequest
-from intelligence.providers.response import AIResponse
-from intelligence.providers.provider_metadata import HealthStatus
-from intelligence.router import Router, NoProviderAvailableError
-from intelligence.engine import AIExecutionEngine
-from intelligence.providers.registry import ProviderRegistry
+from backend.intelligence.provider_state import ProviderLifecycleState
+from backend.intelligence.policy import PolicyEngine
+from backend.intelligence.policies.execution_policy import ExecutionPolicy
+from backend.intelligence.providers.base import AIProvider
+from backend.intelligence.providers.request import AIRequest
+from backend.intelligence.providers.response import AIResponse
+from backend.intelligence.providers.provider_metadata import HealthStatus
+from backend.intelligence.router import Router, NoProviderAvailableError
+from backend.intelligence.engine import AIExecutionEngine
+from backend.intelligence.providers.registry import ProviderRegistry
 
 @pytest.fixture(autouse=True)
 def ai_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch get_feature_flags and is_feature_enabled so ENABLE_AI returns True."""
     monkeypatch.setattr(
-        "intelligence.engine.is_feature_enabled",
+        "backend.intelligence.engine.is_feature_enabled",
         lambda flag: True,
     )
     monkeypatch.setattr(
-        "intelligence.policies.policy_builder.get_feature_flags",
+        "backend.intelligence.policies.policy_builder.get_feature_flags",
         lambda: {"ENABLE_AI": True},
     )
 

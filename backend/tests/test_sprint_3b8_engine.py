@@ -7,8 +7,8 @@ No Django DB, no network calls, no randomness.
 
 import pytest
 from backend.apps.common.pipeline.core import ExecutionResult
-from intelligence.engine import AIExecutionEngine
-from intelligence.providers import (
+from backend.intelligence.engine import AIExecutionEngine
+from backend.intelligence.providers import (
     AIRequest,
     AIResponse,
     DummyProvider,
@@ -16,7 +16,7 @@ from intelligence.providers import (
     MockScenario,
     ProviderRegistry,
 )
-from intelligence.router import Router
+from backend.intelligence.router import Router
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -53,7 +53,7 @@ def make_engine(
 def ai_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch is_feature_enabled so ENABLE_AI returns True."""
     monkeypatch.setattr(
-        "intelligence.engine.is_feature_enabled",
+        "backend.intelligence.engine.is_feature_enabled",
         lambda flag: True,
     )
 
@@ -62,7 +62,7 @@ def ai_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
 def ai_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch is_feature_enabled so ENABLE_AI returns False."""
     monkeypatch.setattr(
-        "intelligence.engine.is_feature_enabled",
+        "backend.intelligence.engine.is_feature_enabled",
         lambda flag: False,
     )
 

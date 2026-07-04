@@ -1,27 +1,23 @@
-"""Selector layer for Investigation domain.
-Provides read‑only queryset helpers scoped to the tenant (organization).
-"""
-
 from typing import Any
-
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
-
 from backend.apps.organizations.models import Organization
-
-from ..models import investigation as inv_models
+from ..models import (
+    Investigation,
+    InvestigationMember,
+    InvestigationTarget,
+    InvestigationTimelineEvent,
+    InvestigationComment,
+)
 
 
 class InvestigationSelector:
-    """Read‑only queries for Investigation objects.
-
-    All methods return QuerySets or serializable data structures; no side‑effects.
-    """
+    """Read‑only queries for Investigation objects and related sub-entities."""
 
     @staticmethod
     def base_queryset(tenant: Organization):
         """Base queryset scoped to the given tenant (organization)."""
-        return inv_models.Investigation.objects.filter(
+        return Investigation.objects.filter(
             organization=tenant,
             is_deleted=False,
         )
@@ -34,10 +30,8 @@ class InvestigationSelector:
         ordering: list[str] | None = None,
         page: int = 1,
         page_size: int = 20,
-    ) -> tuple[list[inv_models.Investigation], dict[str, Any]]:
-        """Return paginated list of investigations with optional filtering/search.
-        Returns a tuple of (items, pagination_meta).
-        """
+    ) -> tuple[list[Investigation], dict[str, Any]]:
+        """Return paginated list of investigations with optional filtering/search."""
         qs = InvestigationSelector.base_queryset(tenant)
 
         if filters:
@@ -80,6 +74,26 @@ class InvestigationSelector:
         return list(page_obj.object_list), meta
 
     @staticmethod
-    def retrieve(tenant: Organization, pk: str) -> inv_models.Investigation:
+    def retrieve(tenant: Organization, pk: str) -> Investigation:
         """Retrieve a single Investigation by primary key, scoped to tenant."""
         return InvestigationSelector.base_queryset(tenant).get(pk=pk)
+
+    @staticmethod
+    def get_members(investigation: Investigation):
+        """Return QuerySet of active members assigned to an investigation."""
+        return InvestigationMember.objects.filter(investigation=investigation, active=True)
+
+    @staticmethod
+    def get_targets(investigation: Investigation):
+        """Return QuerySet of target entities under observation."""
+        return InvestigationTarget.objects.filter(investigation=investigation)
+
+    @staticmethod
+    def get_timeline(investigation: Investigation):
+        """Return QuerySet of timeline events ordered by timestamp."""
+        return InvestigationTimelineEvent.objects.filter(investigation=investigation).order_by("timestamp")
+
+    @staticmethod
+    def get_comments(investigation: Investigation):
+        """Return QuerySet of active (non-deleted) comments."""
+        return InvestigationComment.objects.filter(investigation=investigation, is_deleted=False)

@@ -10,7 +10,7 @@ can be unit-tested without an HTTP request context.
 
 Usage::
 
-    from shared.permissions import BasePermissionPolicy
+    from backend.shared.permissions import BasePermissionPolicy
 
     class InvestigationPolicy(BasePermissionPolicy):
         def can_view(self, actor, resource):

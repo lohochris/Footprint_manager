@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from .provider_metadata import HealthStatus
-from intelligence.provider_state import ProviderLifecycleState
+from backend.intelligence.provider_state import ProviderLifecycleState
 
 if TYPE_CHECKING:
     from .request import AIRequest

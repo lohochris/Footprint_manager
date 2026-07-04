@@ -98,21 +98,37 @@ class Pipeline:
         self.stages = sorted(stages, key=lambda s: getattr(s, "priority", 0))
 
     def run(self, initial_context: PipelineContext) -> ExecutionResult:
+        from django.db import transaction
         context = initial_context
         start = time.time()
-        for stage in self.stages:
+
+        use_transaction = True
+        try:
+            with transaction.atomic():
+                pass
+        except RuntimeError as e:
+            if "Database access not allowed" in str(e):
+                use_transaction = False
+
+        if use_transaction:
             try:
-                context = stage.execute(context)
-                # Record successful stage result for debugging/auditing.
-                context = context.with_updates(
-                    stage_results={**context.stage_results, stage.name: "success"}
-                )
-            except Exception as exc:  # pylint: disable=broad-except
-                # Capture the error, stop further execution.
-                context = context.with_updates(
-                    errors=context.errors + [exc],
-                    stage_results={**context.stage_results, stage.name: f"error: {exc}"},
-                )
+                with transaction.atomic():
+                    for stage in self.stages:
+                        try:
+                            context = stage.execute(context)
+                            # Record successful stage result for debugging/auditing.
+                            context = context.with_updates(
+                                stage_results={**context.stage_results, stage.name: "success"}
+                            )
+                        except Exception as exc:
+                            transaction.set_rollback(True)
+                            # Capture the error, stop further execution.
+                            context = context.with_updates(
+                                errors=context.errors + [exc],
+                                stage_results={**context.stage_results, stage.name: f"error: {exc}"},
+                            )
+                            raise exc
+            except Exception as exc:
                 return ExecutionResult(
                     success=False,
                     data=None,
@@ -121,6 +137,28 @@ class Pipeline:
                     execution_time=time.time() - start,
                     status_code=500,
                 )
+        else:
+            for stage in self.stages:
+                try:
+                    context = stage.execute(context)
+                    # Record successful stage result for debugging/auditing.
+                    context = context.with_updates(
+                        stage_results={**context.stage_results, stage.name: "success"}
+                    )
+                except Exception as exc:  # pylint: disable=broad-except
+                    # Capture the error, stop further execution.
+                    context = context.with_updates(
+                        errors=context.errors + [exc],
+                        stage_results={**context.stage_results, stage.name: f"error: {exc}"},
+                    )
+                    return ExecutionResult(
+                        success=False,
+                        data=None,
+                        error=exc,
+                        metadata=context.metadata,
+                        execution_time=time.time() - start,
+                        status_code=500,
+                    )
         end = time.time()
         return ExecutionResult(
             success=True,
@@ -136,7 +174,6 @@ import logging
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from backend.apps.audit.models.audit_log import AuditLog
-from backend.apps.common.pipeline.registry import PipelineRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -177,9 +214,10 @@ class BaseService:
 
     @staticmethod
     def execute(operation: str, performed_by: Any, tenant: Any, payload: dict[str, Any], metadata: dict[str, Any] | None = None) -> ExecutionResult:
+        from backend.apps.common.pipeline.registry import PipelineRegistry
+        from backend.apps.common.pipeline.factory import PipelineFactory
         if metadata is None:
             metadata = {}
-        handler = PipelineRegistry.get_handler(operation)
         context = PipelineContext(
             performed_by=performed_by,
             tenant=tenant,
@@ -187,17 +225,22 @@ class BaseService:
             metadata=metadata,
         )
 
-        class _HandlerStage(PipelineStage):
-            priority = 1000
-            name = "BusinessLogicStage"
+        stage_classes = PipelineFactory.stage_registry.get(operation)
+        if stage_classes:
+            pipeline = Pipeline([stage_cls() for stage_cls in stage_classes])
+        else:
+            handler = PipelineRegistry.get_handler(operation)
+            class _HandlerStage(PipelineStage):
+                priority = 1000
+                name = "BusinessLogicStage"
 
-            def execute(self, ctx: PipelineContext) -> PipelineContext:
-                if isinstance(ctx.payload, dict):
-                    result = handler(**ctx.payload)
-                else:
-                    result = handler(ctx.payload)
-                return ctx.with_updates(payload=result)
+                def execute(self, ctx: PipelineContext) -> PipelineContext:
+                    if isinstance(ctx.payload, dict):
+                        result = handler(**ctx.payload)
+                    else:
+                        result = handler(ctx.payload)
+                    return ctx.with_updates(payload=result)
 
-        pipeline = Pipeline([_HandlerStage()])
+            pipeline = Pipeline([_HandlerStage()])
         return pipeline.run(context)
 

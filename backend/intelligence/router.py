@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import logging
 
-from intelligence.providers.base import AIProvider
-from intelligence.providers.registry import ProviderRegistry
-from intelligence.providers.registry import _registry as _global_registry
-from intelligence.providers.request import AIRequest
+from backend.intelligence.providers.base import AIProvider
+from backend.intelligence.providers.registry import ProviderRegistry
+from backend.intelligence.providers.registry import _registry as _global_registry
+from backend.intelligence.providers.request import AIRequest
 
 logger = logging.getLogger(__name__)
 
@@ -110,11 +110,11 @@ class Router:
             health_required = True
         else:
             task = task_or_req.task
-            from intelligence.policies.policy_builder import ExecutionPolicyBuilder
+            from backend.intelligence.policies.policy_builder import ExecutionPolicyBuilder
             policy = ExecutionPolicyBuilder().build(task_or_req)
             health_required = policy.health_required
 
-        from intelligence.provider_state import ProviderLifecycleState
+        from backend.intelligence.provider_state import ProviderLifecycleState
 
         candidates = []
         for p in self._registry.list():

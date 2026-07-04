@@ -24,7 +24,6 @@ class InvestigationDetailSerializer(serializers.ModelSerializer):
             "metadata",
             "owner",
             "lead_investigator",
-            "assigned_investigators",
             "created_at",
             "updated_at",
             "is_archived",

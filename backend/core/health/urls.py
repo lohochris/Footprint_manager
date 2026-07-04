@@ -1,6 +1,6 @@
 """Health check URL routes."""
 
-from core.health.views import HealthCheckView, ReadinessCheckView
+from backend.core.health.views import HealthCheckView, ReadinessCheckView
 from django.urls import path
 
 urlpatterns = [

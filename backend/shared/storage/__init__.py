@@ -13,7 +13,7 @@ Planned backends:
 
 Usage::
 
-    from shared.storage import StorageBackend, StoredFile
+    from backend.shared.storage import StorageBackend, StoredFile
 
     def upload_evidence(backend: StorageBackend, name: str, data: bytes) -> str:
         stored = backend.upload(name, data, content_type="image/png")

@@ -3,12 +3,12 @@
 from dataclasses import dataclass
 
 from django.conf import settings
-from shared.cache import CacheBackend
-from shared.constants import ENABLE_AI, FEATURE_FLAG_NAMES, get_feature_flags, is_feature_enabled
-from shared.event_bus import EventHandler, InProcessEventDispatcher
-from shared.events import BaseDomainEvent
-from shared.search import SearchBackend
-from shared.storage import StorageBackend
+from backend.shared.cache import CacheBackend
+from backend.shared.constants import ENABLE_AI, FEATURE_FLAG_NAMES, get_feature_flags, is_feature_enabled
+from backend.shared.event_bus import EventHandler, InProcessEventDispatcher
+from backend.shared.events import BaseDomainEvent
+from backend.shared.search import SearchBackend
+from backend.shared.storage import StorageBackend
 
 
 @dataclass(frozen=True)

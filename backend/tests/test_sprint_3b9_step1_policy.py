@@ -10,8 +10,8 @@ from dataclasses import FrozenInstanceError
 from typing import get_type_hints
 
 import pytest
-from intelligence.policies import ExecutionPolicy, ExecutionPolicyBuilder
-from intelligence.providers import (
+from backend.intelligence.policies import ExecutionPolicy, ExecutionPolicyBuilder
+from backend.intelligence.providers import (
     AIProvider,
     AIRequest,
     DummyProvider,
@@ -19,7 +19,7 @@ from intelligence.providers import (
     HealthStatus,
     MockProvider,
 )
-from shared.constants.feature_flags import ENABLE_AI
+from backend.shared.constants.feature_flags import ENABLE_AI
 
 
 def make_request(

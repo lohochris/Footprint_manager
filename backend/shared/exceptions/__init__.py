@@ -7,7 +7,7 @@ unexpected third-party or stdlib errors.
 
 Usage::
 
-    from shared.exceptions import NotFoundError, ValidationError
+    from backend.shared.exceptions import NotFoundError, ValidationError
 
     raise NotFoundError("Investigation not found", code="INVESTIGATION_NOT_FOUND")
 """

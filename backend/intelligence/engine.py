@@ -12,9 +12,9 @@ import logging
 import time
 
 from backend.apps.common.pipeline.core import ExecutionResult
-from intelligence.providers.request import AIRequest
-from intelligence.router import NoProviderAvailableError, ProviderNotFoundError, Router
-from shared.constants.feature_flags import ENABLE_AI, is_feature_enabled
+from backend.intelligence.providers.request import AIRequest
+from backend.intelligence.router import NoProviderAvailableError, ProviderNotFoundError, Router
+from backend.shared.constants.feature_flags import ENABLE_AI, is_feature_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class AIExecutionEngine:
 
     def __init__(self, router: Router | None = None) -> None:
         self._router: Router = router if router is not None else Router()
-        from intelligence.policies.policy_builder import ExecutionPolicyBuilder
+        from backend.intelligence.policies.policy_builder import ExecutionPolicyBuilder
         self._policy_builder = ExecutionPolicyBuilder()
 
     # ------------------------------------------------------------------
@@ -131,7 +131,7 @@ class AIExecutionEngine:
                 status_code=500,
             )
 
-        from intelligence.policy import PolicyEngine
+        from backend.intelligence.policy import PolicyEngine
         policy_engine = PolicyEngine()
         eval_res = policy_engine.evaluate(request, provider, policy)
 
