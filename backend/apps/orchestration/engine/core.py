@@ -2,7 +2,7 @@ import uuid
 from typing import Dict, Any
 from .context import ExecutionContext
 from .registry import StepRegistry
-from .events import DomainEventBus
+from backend.shared.events import DomainEventBus
 import structlog
 
 logger = structlog.get_logger(__name__)

@@ -25,6 +25,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, ClassVar
+from .bus import DomainEventBus
 
 
 @dataclass(frozen=True)
@@ -84,4 +85,4 @@ class BaseDomainEvent:
         )
 
 
-__all__ = ["BaseDomainEvent"]
+__all__ = ["BaseDomainEvent", "DomainEventBus"]

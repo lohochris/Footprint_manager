@@ -3,7 +3,7 @@ import uuid
 from backend.apps.orchestration.engine.context import ExecutionContext
 from backend.apps.orchestration.engine.core import WorkflowEngine
 from backend.apps.orchestration.engine.registry import StepRegistry, IStepExecutor
-from backend.apps.orchestration.engine.events import DomainEventBus
+from backend.shared.events import DomainEventBus
 
 class DummyExecutor(IStepExecutor):
     def execute(self, step_config: dict, context: ExecutionContext) -> dict:
