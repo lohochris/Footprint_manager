@@ -44,6 +44,7 @@ class GraphBuildBusinessStage(PipelineStage):
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         tenant_id = str(ctx.tenant.id)
         workspace_id = str(ctx.payload.get("workspace_id")) if ctx.payload.get("workspace_id") else None
+        owner_id = str(ctx.performed_by.id) if getattr(ctx, "performed_by", None) else None
 
         nodes: list[NodeDTO] = []
         edges: list[EdgeDTO] = []
@@ -59,6 +60,7 @@ class GraphBuildBusinessStage(PipelineStage):
                     id=str(identity.id),
                     tenant_id=tenant_id,
                     workspace_id=str(identity.workspace_id) if identity.workspace_id else None,
+                    owner_id=owner_id,
                     node_type=GraphNodeType.IDENTITY,
                     label=identity.label,
                     confidence=identity.confidence_score,
@@ -73,9 +75,10 @@ class GraphBuildBusinessStage(PipelineStage):
                 EdgeDTO(
                     id=str(rel.id),
                     tenant_id=tenant_id,
-                    source_id=str(rel.source_id),
-                    target_id=str(rel.target_id),
-                    relationship_type=rel.relationship_type,
+                    source_id=str(rel.source_identity_id),
+                    target_id=str(rel.target_identity_id),
+                    owner_id=owner_id,
+                    relationship_type=rel.type,
                     confidence=rel.confidence,
                 )
             )
@@ -91,6 +94,7 @@ class GraphBuildBusinessStage(PipelineStage):
                     id=str(inv.id),
                     tenant_id=tenant_id,
                     workspace_id=str(inv.workspace_id) if inv.workspace_id else None,
+                    owner_id=owner_id,
                     node_type=GraphNodeType.INVESTIGATION,
                     label=inv.title,
                     metadata={"status": inv.status},
@@ -108,26 +112,32 @@ class GraphBuildBusinessStage(PipelineStage):
                     id=str(ev.id),
                     tenant_id=tenant_id,
                     workspace_id=str(ev.workspace_id) if ev.workspace_id else None,
+                    owner_id=owner_id,
                     node_type=GraphNodeType.EVIDENCE,
                     label=ev.title,
-                    metadata={"evidence_type": ev.evidence_type, "status": ev.status},
+                    metadata={"status": ev.status},
                 )
             )
 
         # 5. Fetch and convert OSINT Discovery Results
-        discovery_qs = DiscoveryResult.objects.filter(organization_id=tenant_id)
+        discovery_qs = DiscoveryResult.objects.filter(job__investigation__organization_id=tenant_id)
         if workspace_id:
-            discovery_qs = discovery_qs.filter(workspace_id=workspace_id)
+            discovery_qs = discovery_qs.filter(job__investigation__workspace_id=workspace_id)
 
         for dr in discovery_qs:
+            workspace_id = None
+            if dr.job and dr.job.investigation and dr.job.investigation.workspace_id:
+                workspace_id = str(dr.job.investigation.workspace_id)
+
             nodes.append(
                 NodeDTO(
                     id=str(dr.id),
                     tenant_id=tenant_id,
-                    workspace_id=str(dr.workspace_id) if dr.workspace_id else None,
+                    workspace_id=workspace_id,
+                    owner_id=owner_id,
                     node_type=GraphNodeType.OSINT,
-                    label=f"OSINT: {dr.value} ({dr.result_type})",
-                    metadata={"result_type": dr.result_type, "value": dr.value},
+                    label=f"OSINT: {dr.title} ({dr.result_type})",
+                    metadata={"result_type": dr.result_type, "title": dr.title},
                 )
             )
 
@@ -178,6 +188,7 @@ class GraphSyncBusinessStage(PipelineStage):
     def execute(self, ctx: PipelineContext) -> PipelineContext:
         tenant_id = str(ctx.tenant.id)
         workspace_id = str(ctx.payload.get("workspace_id")) if ctx.payload.get("workspace_id") else None
+        owner_id = str(ctx.performed_by.id) if getattr(ctx, "performed_by", None) else None
 
         nodes_data = ctx.payload.get("nodes", [])
         edges_data = ctx.payload.get("edges", [])
@@ -187,6 +198,7 @@ class GraphSyncBusinessStage(PipelineStage):
                 id=n["id"],
                 tenant_id=tenant_id,
                 workspace_id=workspace_id,
+                owner_id=owner_id,
                 node_type=n.get("node_type", GraphNodeType.CUSTOM),
                 label=n.get("label", "Node"),
                 confidence=Decimal(str(n.get("confidence", "1.000"))),
@@ -201,6 +213,7 @@ class GraphSyncBusinessStage(PipelineStage):
                 tenant_id=tenant_id,
                 source_id=e["source_id"],
                 target_id=e["target_id"],
+                owner_id=owner_id,
                 relationship_type=e.get("relationship_type", GraphRelationshipType.CUSTOM),
                 confidence=Decimal(str(e.get("confidence", "1.000"))),
                 evidence_references=e.get("evidence_references", []),

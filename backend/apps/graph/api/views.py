@@ -74,10 +74,20 @@ class GraphSnapshotViewSet(viewsets.ModelViewSet):
         )
 
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+
 class GraphTraversalViewSet(viewsets.ViewSet):
     """Endpoints for performing graph traversals, calculations, and sync operations."""
     permission_classes = [IsTenantMember]
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("node_id", OpenApiTypes.UUID, description="Start node ID"),
+            OpenApiParameter("workspace_id", OpenApiTypes.UUID, required=False),
+            OpenApiParameter("depth", OpenApiTypes.INT, default=1),
+        ],
+        responses=TraversalResultDTOSerializer
+    )
     @action(detail=False, methods=["get"], url_path="expand")
     def expand(self, request):
         tenant = request.tenant
@@ -92,6 +102,14 @@ class GraphTraversalViewSet(viewsets.ViewSet):
         serializer = TraversalResultDTOSerializer(res)
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("start_node_id", OpenApiTypes.UUID),
+            OpenApiParameter("end_node_id", OpenApiTypes.UUID),
+            OpenApiParameter("workspace_id", OpenApiTypes.UUID, required=False),
+        ],
+        responses=NodeDTOSerializer(many=True)
+    )
     @action(detail=False, methods=["get"], url_path="shortest-path")
     def shortest_path(self, request):
         tenant = request.tenant
@@ -106,6 +124,12 @@ class GraphTraversalViewSet(viewsets.ViewSet):
         serializer = NodeDTOSerializer(res, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("workspace_id", OpenApiTypes.UUID, required=False),
+        ],
+        responses=GraphStatsDTOSerializer
+    )
     @action(detail=False, methods=["get"], url_path="statistics")
     def statistics(self, request):
         tenant = request.tenant
@@ -115,6 +139,10 @@ class GraphTraversalViewSet(viewsets.ViewSet):
         serializer = GraphStatsDTOSerializer(stats)
         return Response(serializer.data)
 
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"workspace_id": {"type": "string", "format": "uuid"}}}},
+        responses={200: {"type": "object", "properties": {"status": {"type": "string"}, "data": {"type": "object"}}}}
+    )
     @action(detail=False, methods=["post"], url_path="rebuild")
     def rebuild(self, request):
         tenant = request.tenant
@@ -123,6 +151,12 @@ class GraphTraversalViewSet(viewsets.ViewSet):
         res = GraphService.refresh_graph(request.user, tenant, workspace_id)
         return Response({"status": "success", "data": res})
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("workspace_id", OpenApiTypes.UUID, required=False),
+        ],
+        responses={200: {"type": "object", "properties": {"elements": {"type": "object"}}}}
+    )
     @action(detail=False, methods=["get"], url_path="visualize/cytoscape")
     def cytoscape(self, request):
         """Format the isolated sub-graph into Cytoscape.js readable format."""

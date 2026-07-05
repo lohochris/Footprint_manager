@@ -12,6 +12,7 @@ class NodeDTO:
     label: str
     metadata: dict[str, Any] = field(default_factory=dict)
     confidence: Decimal = Decimal("1.000")
+    owner_id: str | None = None
     created_at: str | None = None
     updated_at: str | None = None
 
@@ -25,6 +26,7 @@ class EdgeDTO:
     relationship_type: str
     direction: str = "directed"
     confidence: Decimal = Decimal("1.000")
+    owner_id: str | None = None
     provenance: str = "system"
     evidence_references: list[str] = field(default_factory=list)
     investigation_references: list[str] = field(default_factory=list)

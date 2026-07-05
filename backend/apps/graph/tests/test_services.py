@@ -58,9 +58,9 @@ class GraphServiceTests(TestCase):
         )
         self.rel = IdentityRelationship.objects.create(
             tenant_id=self.org.id,
-            source=self.identity_a,
-            target=self.identity_b,
-            relationship_type=GraphRelationshipType.CORRELATES_WITH,
+            source_identity=self.identity_a,
+            target_identity=self.identity_b,
+            type=GraphRelationshipType.CORRELATES_WITH,
             confidence=Decimal("0.850"),
             owner=self.owner,
         )
@@ -71,25 +71,38 @@ class GraphServiceTests(TestCase):
             title="Sovereign Shield",
             status="active",
             created_by=self.owner,
+            owner=self.owner,
         )
 
         self.evidence = Evidence.objects.create(
+            tenant_id=self.org.id,
             organization=self.org,
             workspace=self.workspace,
             title="Phishing Email Headers",
-            evidence_type="email",
             status="verified",
             owner=self.owner,
         )
 
         # OSINT results
+        from backend.apps.osint.models.discovery_provider import DiscoveryProvider
+        from backend.apps.osint.models.discovery_job import DiscoveryJob
+
+        provider = DiscoveryProvider.objects.create(
+            name="test-provider",
+            display_name="Test Provider",
+            provider_status="active"
+        )
+        job = DiscoveryJob.objects.create(
+            investigation=self.investigation,
+            provider=provider,
+            status="completed"
+        )
         self.osint_result = DiscoveryResult.objects.create(
-            organization=self.org,
-            workspace=self.workspace,
+            job=job,
+            provider=provider,
             result_type="email",
-            value="osint@example.com",
+            title="osint@example.com",
             raw_data={},
-            owner=self.owner,
         )
 
     def test_build_and_query_graph(self):

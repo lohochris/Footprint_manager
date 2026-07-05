@@ -56,6 +56,7 @@ class DjangoORMGraphProvider(GraphProvider):
                     defaults={
                         "organization_id": tenant_id,
                         "workspace_id": workspace_id,
+                        "owner_id": node_dto.owner_id,  # type: ignore[misc]
                         "node_type": node_dto.node_type,
                         "label": node_dto.label,
                         "metadata": node_dto.metadata,
@@ -77,6 +78,7 @@ class DjangoORMGraphProvider(GraphProvider):
                     defaults={
                         "source_node": source,
                         "target_node": target,
+                        "owner_id": edge_dto.owner_id,  # type: ignore[misc]
                         "relationship_type": edge_dto.relationship_type,
                         "direction": edge_dto.direction,
                         "confidence": edge_dto.confidence,

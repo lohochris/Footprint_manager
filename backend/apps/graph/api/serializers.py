@@ -60,7 +60,7 @@ class NodeDTOSerializer(serializers.Serializer):
     tenant_id = serializers.CharField()
     workspace_id = serializers.CharField(allow_null=True)
     node_type = serializers.CharField()
-    label = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
     metadata = serializers.DictField(child=serializers.JSONField())
     confidence = serializers.DecimalField(max_digits=4, decimal_places=3)
     created_at = serializers.CharField(allow_null=True, required=False)
