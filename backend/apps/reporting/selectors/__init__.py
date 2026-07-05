@@ -8,10 +8,14 @@ from ..models import Report, ReportExport, ReportTemplate, ReportVersion
 
 class ReportSelector:
     def get_investigation_reports(self, investigation_id: UUID, tenant_id: UUID) -> QuerySet[Report]:
-        return Report.objects.filter(investigation_id=investigation_id, workspace_id=tenant_id).order_by("-created_at")
+        return Report.objects.filter(
+            investigation_id=investigation_id, workspace_id=tenant_id
+        ).select_related("template", "author").order_by("-created_at")
 
     def get_published_reports(self, tenant_id: UUID) -> QuerySet[Report]:
-        return Report.objects.filter(status=Report.Status.PUBLISHED, workspace_id=tenant_id).order_by("-published_at")
+        return Report.objects.filter(
+            status=Report.Status.PUBLISHED, workspace_id=tenant_id
+        ).select_related("template", "author").order_by("-published_at")
 
 
 class TemplateSelector:
