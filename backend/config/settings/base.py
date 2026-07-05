@@ -68,6 +68,7 @@ LOCAL_APPS = [
     "backend.apps.orchestration",
     "backend.apps.collaboration",
     "backend.apps.realtime",
+    "backend.apps.observability",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
