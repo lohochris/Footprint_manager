@@ -21,6 +21,7 @@ urlpatterns = [
     path("api/v1/orchestration/", include("backend.apps.orchestration.api.urls")),
     path("api/v1/collaboration/", include("backend.apps.collaboration.api.urls")),
     path("api/v1/integrations/", include("backend.apps.integrations.api.urls")),
+    path("api/v1/realtime/", include("backend.apps.realtime.api.urls")),
     path(
         "api/docs/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
