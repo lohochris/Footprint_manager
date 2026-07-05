@@ -30,7 +30,7 @@ class IntelligenceEngine:
         context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Runs the full intelligence pipeline on the provided graph."""
-        
+
         ctx = context or {}
 
         # 1. Compute Analytics

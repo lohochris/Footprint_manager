@@ -48,7 +48,7 @@ class AnalyticsProvider(IAnalyticsCalculator):
             G.add_edge(edge.source_id, edge.target_id)
 
         node_metrics: Dict[str, NodeCentralityDTO] = {}
-        
+
         degree_cent = nx.degree_centrality(G)
         betweenness_cent = nx.betweenness_centrality(G)
         closeness_cent = nx.closeness_centrality(G)

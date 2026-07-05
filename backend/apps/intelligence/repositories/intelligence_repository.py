@@ -29,12 +29,12 @@ class IntelligenceRepository(IIntelligenceRepository):
     def save_risk_assessment(self, risk: RiskAssessmentDTO, owner_id: str) -> None:
         # First, we could optionally clear old scores for these nodes, or just update.
         # For this sprint, we assume simple create/update loop.
-        
+
         for node_id, entity_risk in risk.entity_risks.items():
             # Create or update EntityScore
             score_obj, _ = EntityScore.objects.update_or_create(
                 tenant_id=risk.tenant_id,
-                workspace_id=risk.workspace_id,
+                workspace_id=risk.workspace_id, # type: ignore
                 node_id=node_id,
                 defaults={
                     "risk_score": entity_risk.risk_score,
@@ -47,7 +47,7 @@ class IntelligenceRepository(IIntelligenceRepository):
 
             # Clear old factors and recreate
             RiskFactor.objects.filter(entity_score=score_obj).delete()
-            
+
             factors_to_create = []
             for f in entity_risk.factors:
                 factors_to_create.append(
@@ -80,6 +80,6 @@ class IntelligenceRepository(IIntelligenceRepository):
                     owner_id=owner_id,
                 )
             )
-        
+
         if recs_to_create:
             IntelligenceRecommendation.objects.bulk_create(recs_to_create)

@@ -1,38 +1,44 @@
 import uuid
 from typing import Any
-
-from backend.apps.graph.repositories import GraphRepository
 from backend.apps.intelligence.engine.intelligence_engine import IntelligenceEngine
 from backend.apps.intelligence.repositories.intelligence_repository import IntelligenceRepository
 from backend.apps.common.pipeline.core import PipelineContext, PipelineStage
+from backend.apps.intelligence.dto.analytics import AnalyticsResultDTO
+from backend.apps.intelligence.dto.risk import RiskAssessmentDTO
+from typing import cast
 
 
 class IntelligenceValidationStage(PipelineStage):
     """Validates the inputs before intelligence calculations begin."""
 
-    def execute(self, ctx: PipelineContext) -> None:
-        tenant_id = ctx.tenant_id
+    def execute(self, ctx: PipelineContext) -> PipelineContext:
+        tenant_id = getattr(ctx.tenant, "id", ctx.tenant)
         if not tenant_id:
-            ctx.add_error("tenant_id is required for intelligence calculation")
-            return
+            return ctx.with_updates(errors=ctx.errors + [ValueError("tenant_id is required for intelligence calculation")])
+        return ctx
 
 
 class FetchGraphStage(PipelineStage):
     """Retrieves the subgraph for analytics."""
 
-    def __init__(self, repository: GraphRepository | None = None) -> None:
-        self.repository = repository or GraphRepository()
+    def __init__(self, repository: Any | None = None) -> None:
+        if repository is None:
+            from backend.apps.graph.repositories import DjangoGraphRepository
+            from backend.apps.graph.providers.neo4j import Neo4jProvider
+            self.repository = DjangoGraphRepository(provider=Neo4jProvider())
+        else:
+            self.repository = repository
 
-    def execute(self, ctx: PipelineContext) -> None:
-        if ctx.has_errors():
-            return
-            
+    def execute(self, ctx: PipelineContext) -> PipelineContext:
+        if ctx.errors:
+            return ctx
+
+        tenant_id = getattr(ctx.tenant, "id", ctx.tenant)
         nodes, edges = self.repository.get_subgraph(
-            tenant_id=ctx.tenant_id,
-            workspace_id=ctx.get("workspace_id")
+            tenant_id=tenant_id,
+            workspace_id=ctx.payload.get("workspace_id")
         )
-        ctx.set("nodes", nodes)
-        ctx.set("edges", edges)
+        return ctx.with_updates(payload={**ctx.payload, "nodes": nodes, "edges": edges})
 
 
 class ComputeAnalyticsStage(PipelineStage):
@@ -41,20 +47,21 @@ class ComputeAnalyticsStage(PipelineStage):
     def __init__(self, engine: IntelligenceEngine | None = None) -> None:
         self.engine = engine or IntelligenceEngine()
 
-    def execute(self, ctx: PipelineContext) -> None:
-        if ctx.has_errors():
-            return
+    def execute(self, ctx: PipelineContext) -> PipelineContext:
+        if ctx.errors:
+            return ctx
 
-        nodes = ctx.get("nodes", [])
-        edges = ctx.get("edges", [])
+        tenant_id = getattr(ctx.tenant, "id", ctx.tenant)
+        nodes = ctx.payload.get("nodes", [])
+        edges = ctx.payload.get("edges", [])
 
         analytics = self.engine.analytics_service.analyze_graph(
-            tenant_id=ctx.tenant_id,
-            workspace_id=ctx.get("workspace_id"),
+            tenant_id=tenant_id,
+            workspace_id=ctx.payload.get("workspace_id"),
             nodes=nodes,
             edges=edges,
         )
-        ctx.set("analytics", analytics)
+        return ctx.with_updates(payload={**ctx.payload, "analytics": analytics})
 
 
 class ScoreRiskStage(PipelineStage):
@@ -63,22 +70,23 @@ class ScoreRiskStage(PipelineStage):
     def __init__(self, engine: IntelligenceEngine | None = None) -> None:
         self.engine = engine or IntelligenceEngine()
 
-    def execute(self, ctx: PipelineContext) -> None:
-        if ctx.has_errors():
-            return
+    def execute(self, ctx: PipelineContext) -> PipelineContext:
+        if ctx.errors:
+            return ctx
 
-        nodes = ctx.get("nodes", [])
-        analytics = ctx.get("analytics")
-        context_data = {"watchlists": ctx.get("watchlists", [])}
+        tenant_id = getattr(ctx.tenant, "id", ctx.tenant)
+        nodes = ctx.payload.get("nodes", [])
+        analytics = cast(AnalyticsResultDTO, ctx.payload.get("analytics"))
+        context_data = {"watchlists": ctx.payload.get("watchlists", [])}
 
         risk = self.engine.risk_service.assess_risk(
-            tenant_id=ctx.tenant_id,
-            workspace_id=ctx.get("workspace_id"),
+            tenant_id=tenant_id,
+            workspace_id=ctx.payload.get("workspace_id"),
             nodes=nodes,
             analytics=analytics,
             context=context_data,
         )
-        ctx.set("risk", risk)
+        return ctx.with_updates(payload={**ctx.payload, "risk": risk})
 
 
 class RecommendationStage(PipelineStage):
@@ -87,26 +95,27 @@ class RecommendationStage(PipelineStage):
     def __init__(self, engine: IntelligenceEngine | None = None) -> None:
         self.engine = engine or IntelligenceEngine()
 
-    def execute(self, ctx: PipelineContext) -> None:
-        if ctx.has_errors():
-            return
+    def execute(self, ctx: PipelineContext) -> PipelineContext:
+        if ctx.errors:
+            return ctx
 
-        nodes = ctx.get("nodes", [])
-        edges = ctx.get("edges", [])
-        analytics = ctx.get("analytics")
-        risk = ctx.get("risk")
-        context_data = {"watchlists": ctx.get("watchlists", [])}
+        tenant_id = getattr(ctx.tenant, "id", ctx.tenant)
+        nodes = ctx.payload.get("nodes", [])
+        edges = ctx.payload.get("edges", [])
+        analytics = cast(AnalyticsResultDTO, ctx.payload.get("analytics"))
+        risk = cast(RiskAssessmentDTO, ctx.payload.get("risk"))
+        context_data = {"watchlists": ctx.payload.get("watchlists", [])}
 
         recommendations = self.engine.recommendation_service.generate_recommendations(
-            tenant_id=ctx.tenant_id,
-            workspace_id=ctx.get("workspace_id"),
+            tenant_id=tenant_id,
+            workspace_id=ctx.payload.get("workspace_id"),
             nodes=nodes,
             edges=edges,
             analytics=analytics,
             risk=risk,
             context=context_data,
         )
-        ctx.set("recommendations", recommendations)
+        return ctx.with_updates(payload={**ctx.payload, "recommendations": recommendations})
 
 
 class PersistenceStage(PipelineStage):
@@ -116,18 +125,19 @@ class PersistenceStage(PipelineStage):
         # Avoid direct import if repository isn't written yet
         self.repository = repository
 
-    def execute(self, ctx: PipelineContext) -> None:
-        if ctx.has_errors():
-            return
+    def execute(self, ctx: PipelineContext) -> PipelineContext:
+        if ctx.errors:
+            return ctx
 
         if not self.repository:
             # lazy load to avoid circular imports during setup
             from backend.apps.intelligence.repositories.intelligence_repository import IntelligenceRepository
             self.repository = IntelligenceRepository()
 
-        analytics = ctx.get("analytics")
-        risk = ctx.get("risk")
-        recommendations = ctx.get("recommendations")
+        # Optional analytics persistence if needed later
+        # analytics = ctx.payload.get("analytics")
+        risk = ctx.payload.get("risk")
+        recommendations = ctx.payload.get("recommendations")
 
         owner_id = ctx.performed_by
 
@@ -135,3 +145,5 @@ class PersistenceStage(PipelineStage):
             self.repository.save_risk_assessment(risk, owner_id)
         if recommendations:
             self.repository.save_recommendations(recommendations, owner_id)
+
+        return ctx

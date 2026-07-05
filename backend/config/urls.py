@@ -17,6 +17,7 @@ urlpatterns = [
     path("api/v1/identity/", include("backend.apps.identity.api.urls")),
     path("api/v1/graph/", include("backend.apps.graph.api.urls")),
     path("api/v1/intelligence/", include("backend.apps.intelligence.api.urls")),
+    path("api/v1/ai/", include("backend.apps.ai_assistant.api.urls")),
     path(
         "api/docs/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),

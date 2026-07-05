@@ -35,7 +35,7 @@ class RiskService:
 
         for node in nodes:
             metrics = analytics.node_metrics.get(node.id, NodeCentralityDTO(node_id=node.id))
-            
+
             factors = []
             for strategy in self.strategies:
                 factors.extend(strategy.evaluate(node, metrics, analytics, context))
@@ -44,9 +44,9 @@ class RiskService:
             risk_score = baseline
             for f in factors:
                 risk_score += f.weight_applied
-            
+
             risk_score = min(max(risk_score, Decimal("0.0000")), Decimal("1.0000"))
-            
+
             explanation = {
                 "final_score": float(risk_score),
                 "baseline": float(baseline),

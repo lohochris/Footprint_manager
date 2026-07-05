@@ -102,12 +102,12 @@ class SuspiciousClusterStrategy(IRecommendationStrategy):
         for component in analytics.components:
             if len(component.node_ids) < 3:
                 continue
-            
+
             high_risk_count = 0
             for nid in component.node_ids:
                 if nid in risk.entity_risks and risk.entity_risks[nid].risk_score > Decimal("0.6000"):
                     high_risk_count += 1
-            
+
             if high_risk_count >= 2:
                 recs.append(
                     RecommendationDTO(

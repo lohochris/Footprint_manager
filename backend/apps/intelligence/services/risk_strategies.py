@@ -79,7 +79,7 @@ class WatchlistProximityStrategy(IRiskStrategy):
     ) -> List[RiskFactorDTO]:
         factors = []
         watchlists = context.get("watchlists", [])
-        
+
         # Simple implementation: exact match on label
         for wl in watchlists:
             if wl.entity_value == node.label:
@@ -91,5 +91,5 @@ class WatchlistProximityStrategy(IRiskStrategy):
                     )
                 )
                 break
-                
+
         return factors
