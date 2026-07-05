@@ -63,6 +63,7 @@ LOCAL_APPS = [
     "backend.apps.osint",
     "backend.apps.identity",
     "backend.apps.graph",
+    "backend.apps.intelligence",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
