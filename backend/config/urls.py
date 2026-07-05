@@ -22,6 +22,7 @@ urlpatterns = [
     path("api/v1/collaboration/", include("backend.apps.collaboration.api.urls")),
     path("api/v1/integrations/", include("backend.apps.integrations.api.urls")),
     path("api/v1/realtime/", include("backend.apps.realtime.api.urls")),
+    path("api/v1/decision-engine/", include("backend.apps.decision_engine.urls")),
     path("", include("backend.apps.observability.api.urls")),
     path(
         "api/docs/swagger/",
