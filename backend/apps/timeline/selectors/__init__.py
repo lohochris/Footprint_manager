@@ -9,7 +9,7 @@ from ..models import EventCluster, Timeline, TimelineEvent, TimelineSnapshot
 
 class TimelineQuery:
     """Reusable abstraction for querying timelines."""
-    
+
     def __init__(self, tenant_id: UUID):
         self.tenant_id = tenant_id
         self.queryset = TimelineEvent.objects.filter(workspace_id=tenant_id)

@@ -31,6 +31,6 @@ def test_openai_provider_stub():
 def test_provider_factory():
     provider = AIProviderFactory.get_provider("mock")
     assert isinstance(provider, MockAIProvider)
-    
+
     provider = AIProviderFactory.get_provider("openai")
     assert isinstance(provider, OpenAIProvider)

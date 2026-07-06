@@ -25,7 +25,7 @@ class APIKeyService:
         tenant_id: UUID,
         organization_id: UUID,
     ) -> APIKey:
-        
+
         api_key = self.repository.create_api_key(
             name=name,
             owner_id=owner_id,
@@ -42,7 +42,7 @@ class APIKeyService:
             actor_id=owner_id,
             details={"api_key_id": str(api_key.id), "scopes": scopes},
         )
-        
+
         event_bus.publish(
             "APIKeyCreated",
             {
@@ -71,7 +71,7 @@ class APIKeyService:
             actor_id=actor_id,
             details={"api_key_id": str(api_key.id)},
         )
-        
+
         event_bus.publish(
             "APIKeyRevoked",
             {

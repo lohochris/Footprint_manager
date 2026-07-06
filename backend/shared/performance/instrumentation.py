@@ -42,7 +42,7 @@ def track_performance(context_provider: Callable[..., PerformanceContext]):
                 return func(*args, **kwargs)
             finally:
                 duration_ms = (time.perf_counter() - start_time) * 1000.0
-                
+
                 # We attempt to extract context and emit safely so telemetry never crashes business logic
                 try:
                     context = context_provider(*args, **kwargs)
@@ -54,7 +54,7 @@ def track_performance(context_provider: Callable[..., PerformanceContext]):
                             "value": duration_ms,
                         },
                     )
-                except Exception as e:
+                except Exception:
                     # Normally we would log to stdout or a raw logger here
                     pass
 

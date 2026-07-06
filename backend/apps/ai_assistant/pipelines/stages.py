@@ -1,4 +1,4 @@
-from backend.common.pipeline.core import PipelineContext, PipelineStage
+from backend.apps.common.pipeline.core import PipelineContext, PipelineStage
 
 class AIPromptAssemblyStage(PipelineStage):
     def execute(self, ctx: PipelineContext) -> PipelineContext:

@@ -15,24 +15,24 @@ def user():
 def test_engine_chat_flow(user):
     # Set default provider to mock
     settings.DEFAULT_AI_PROVIDER = "mock"
-    
+
     tenant_id = uuid.uuid4()
     session = AssistantSession.objects.create(tenant_id=tenant_id, owner=user, title="Engine Test")
-    
+
     engine = AIIntelligenceEngine()
     response = engine.chat(session_id=str(session.id), user_message="What is the capital of France?")
-    
+
     assert "mock response" in response.lower()
-    
+
     # Verify persistence
     messages = AssistantMessage.objects.filter(session=session).order_by("created_at")
     assert messages.count() == 2
     assert messages[0].role == "user"
     assert messages[0].content == "What is the capital of France?"
-    
+
     assert messages[1].role == "assistant"
     assert "mock response" in messages[1].content.lower()
-    
+
     # Verify Logging
     logs = AIInteractionLog.objects.filter(tenant_id=tenant_id)
     assert logs.count() == 1

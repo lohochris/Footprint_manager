@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 from django.conf import settings
-from backend.shared.cache import CacheBackend
+from backend.shared.cache import BaseCacheProvider
 from backend.shared.constants import ENABLE_AI, FEATURE_FLAG_NAMES, get_feature_flags, is_feature_enabled
 from backend.shared.event_bus import EventHandler, InProcessEventDispatcher
 from backend.shared.events import BaseDomainEvent
@@ -50,6 +50,6 @@ def test_event_dispatcher_delivers_registered_domain_events():
 
 
 def test_shared_interfaces_remain_abstract():
-    assert CacheBackend.__abstractmethods__
+    assert BaseCacheProvider.__abstractmethods__
     assert SearchBackend.__abstractmethods__
     assert StorageBackend.__abstractmethods__

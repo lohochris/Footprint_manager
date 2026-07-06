@@ -2,7 +2,7 @@ import pytest
 import uuid
 from django.contrib.auth import get_user_model
 from backend.apps.ai_assistant.models import (
-    AssistantSession, AssistantMessage, PromptTemplate, 
+    AssistantSession, AssistantMessage, PromptTemplate,
     AIInteractionLog, AIFeedback
 )
 
@@ -17,7 +17,7 @@ def user():
 def test_assistant_session_creation(user):
     tenant_id = uuid.uuid4()
     workspace_id = uuid.uuid4()
-    
+
     session = AssistantSession.objects.create(
         tenant_id=tenant_id,
         workspace_id=workspace_id,
@@ -39,14 +39,14 @@ def test_assistant_message_creation(user):
         owner=user,
         title="Test Session"
     )
-    
+
     msg = AssistantMessage.objects.create(
         session=session,
         role="user",
         content="Hello AI",
         tokens_used=10
     )
-    
+
     assert msg.session == session
     assert msg.role == "user"
     assert msg.content == "Hello AI"
@@ -62,7 +62,7 @@ def test_prompt_template_creation():
         template_text="Hello {name}",
         is_active=True
     )
-    
+
     assert template.name == "test_prompt"
     assert template.version == "v1"
     assert template.template_text == "Hello {name}"
@@ -79,7 +79,7 @@ def test_ai_interaction_log_creation():
         cost=0.001,
         status="success"
     )
-    
+
     assert log.provider == "MockAIProvider"
     assert log.status == "success"
 
@@ -87,13 +87,13 @@ def test_ai_feedback_creation(user):
     tenant_id = uuid.uuid4()
     session = AssistantSession.objects.create(tenant_id=tenant_id, owner=user)
     msg = AssistantMessage.objects.create(session=session, role="assistant", content="AI says hi")
-    
+
     feedback = AIFeedback.objects.create(
         message=msg,
         is_positive=True,
         comment="Good answer"
     )
-    
+
     assert feedback.message == msg
     assert feedback.is_positive is True
     assert feedback.comment == "Good answer"

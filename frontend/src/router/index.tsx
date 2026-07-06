@@ -1,17 +1,68 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+/* eslint-disable react-refresh/only-export-components */
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { ShellLayout } from '@/layouts/ShellLayout';
+import { RequireAuth, RequireWorkspace } from './guards';
+import { GlobalErrorBoundary } from '@/components/GlobalErrorBoundary';
+import { WorkspaceContextProvider } from '@/providers';
 
-import { MainLayout } from '@/layouts/MainLayout';
-import { HomePage } from '@/pages/HomePage';
-import { NotFoundPage } from '@/pages/NotFoundPage';
+// Placeholder empty components to satisfy Phase 1 routing structure
+// In subsequent phases, these will be replaced with actual Lazy-loaded feature components
+const PlaceholderComponent = ({ title }: { title: string }) => (
+  <div style={{ padding: 24 }}><h2>{title}</h2></div>
+);
 
-export function AppRouter() {
-  return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="dashboard" element={<Navigate to="/" replace />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
-  );
-}
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    errorElement: <GlobalErrorBoundary />,
+    element: <RequireAuth />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/workspace/default/dashboard" replace />
+      },
+      {
+        path: 'select-workspace',
+        element: <PlaceholderComponent title="Workspace Selection" />
+      },
+      {
+        path: 'workspace/:workspaceId',
+        element: <RequireWorkspace />,
+        children: [
+          {
+            element: (
+              <WorkspaceContextProvider>
+                <ShellLayout />
+              </WorkspaceContextProvider>
+            ),
+            children: [
+              { index: true, element: <Navigate to="dashboard" replace /> },
+              { path: 'dashboard', element: <PlaceholderComponent title="Dashboard" /> },
+              { path: 'investigations', element: <PlaceholderComponent title="Investigations" /> },
+              { path: 'investigations/:id', element: <PlaceholderComponent title="Investigation Details" /> },
+              { path: 'evidence', element: <PlaceholderComponent title="Evidence Workspace" /> },
+              { path: 'identity', element: <PlaceholderComponent title="Identity Resolution" /> },
+              { path: 'graph', element: <PlaceholderComponent title="Graph Intelligence" /> },
+              { path: 'timeline', element: <PlaceholderComponent title="Timeline Intelligence" /> },
+              { path: 'intelligence', element: <PlaceholderComponent title="Intelligence" /> },
+              { path: 'integrations', element: <PlaceholderComponent title="Integrations" /> },
+            ]
+          }
+        ]
+      },
+      {
+        path: 'admin',
+        // element: <RequireAdmin><AdminLayout /></RequireAdmin>,
+        element: <PlaceholderComponent title="Admin Settings" />,
+        children: [
+          { path: 'settings', element: <PlaceholderComponent title="Settings" /> },
+          { path: 'observability', element: <PlaceholderComponent title="Observability" /> },
+        ]
+      }
+    ]
+  },
+  {
+    path: '/login',
+    element: <PlaceholderComponent title="Login Page" />
+  }
+]);

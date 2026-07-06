@@ -36,12 +36,12 @@ def handle_platform_event(event_type: str, payload: Dict[str, Any]) -> None:
     organization_id = payload.get("organization_id")
     resource_type = payload.get("resource_type", "Unknown")
     resource_id_str = payload.get("resource_id")
-    
+
     if not tenant_id or not organization_id or not resource_id_str:
         return
 
     resource_id = UUID(resource_id_str)
-    
+
     timeline_service.record_event(
         event_type=event_type,
         source_bounded_context=payload.get("source_context", "Unknown"),

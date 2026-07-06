@@ -8,6 +8,8 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+import structlog
+from celery.schedules import crontab
 from backend.core.logging.setup import configure_structlog
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -269,22 +271,22 @@ LOGGING = {
     "formatters": {
         "json": {
             "()": "structlog.stdlib.ProcessorFormatter",
-            "processor": "structlog.processors.JSONRenderer()",
+            "processor": structlog.processors.JSONRenderer(),
             "foreign_pre_chain": [
-                "structlog.contextvars.merge_contextvars",
-                "structlog.stdlib.add_log_level",
-                "structlog.stdlib.add_logger_name",
-                "structlog.processors.TimeStamper(fmt='iso')",
+                structlog.contextvars.merge_contextvars,
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.add_logger_name,
+                structlog.processors.TimeStamper(fmt='iso'),
             ],
         },
         "console": {
             "()": "structlog.stdlib.ProcessorFormatter",
-            "processor": "structlog.dev.ConsoleRenderer(colors=True)",
+            "processor": structlog.dev.ConsoleRenderer(colors=True),
             "foreign_pre_chain": [
-                "structlog.contextvars.merge_contextvars",
-                "structlog.stdlib.add_log_level",
-                "structlog.stdlib.add_logger_name",
-                "structlog.processors.TimeStamper(fmt='iso')",
+                structlog.contextvars.merge_contextvars,
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.add_logger_name,
+                structlog.processors.TimeStamper(fmt='iso'),
             ],
         },
     },

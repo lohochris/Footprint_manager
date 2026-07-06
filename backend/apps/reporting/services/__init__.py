@@ -63,10 +63,10 @@ class PublishingService:
         organization_id: UUID,
         actor_id: UUID,
     ) -> ReportVersion:
-        
+
         # Any modification or publishing creates a new immutable version
         new_version_number = report.version + 1
-        
+
         version = self.version_repository.create_version(
             report=report,
             version_number=new_version_number,
@@ -134,10 +134,10 @@ class ExportService:
         organization_id: UUID,
         actor_id: UUID,
     ) -> ReportExport:
-        
+
         # Provider handles the actual generation (e.g. converting HTML payload to PDF)
         export_dto = self.provider.generate_export(report_version.payload, format)
-        
+
         export = self.export_repository.create_export(
             report_version=report_version,
             export_format=format,

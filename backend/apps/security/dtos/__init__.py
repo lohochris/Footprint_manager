@@ -66,7 +66,7 @@ class SecurityContext:
     session_id: Optional[UUID] = None
     risk_score: float = 0.0
     is_mfa_authenticated: bool = False
-    
+
     def as_dict(self) -> Dict[str, Any]:
         return {
             "user_id": str(self.user_id),

@@ -32,7 +32,7 @@ class PolicyViewSet(viewsets.ViewSet):
         policy = self.policy_selector.get_policy_detail(tenant_id, pk)
         if not policy:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        
+
         # Serialize rules correctly
         policy_dict = policy.__dict__.copy()
         policy_dict["rules"] = [r.__dict__ for r in policy.rules]

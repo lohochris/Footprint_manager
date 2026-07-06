@@ -37,7 +37,7 @@ class GovernancePolicyService:
             policy.status = GovernancePolicy.Status.ACTIVE
             policy.save()
             self.event_bus.publish("PolicyActivated", {"policy_id": str(policy.id)})
-            
+
             # Audit
             AuditRepository().create_audit(
                 action_type=GovernanceAudit.ActionType.POLICY_CHANGE,
@@ -48,7 +48,7 @@ class GovernancePolicyService:
                 organization_id=policy.organization_id,
                 actor_id=user_id,
             )
-            
+
         return policy
 
 
@@ -79,7 +79,7 @@ class ApprovalService:
             tenant_id=tenant_id,
             justification=justification,
         )
-        
+
         self.event_bus.publish(
             "ApprovalRequested",
             {
@@ -144,7 +144,7 @@ class ComplianceService:
         tenant_id: UUID,
     ) -> ComplianceEvaluation:
         rule = ComplianceRule.objects.get(id=rule_id, workspace_id=tenant_id)
-        
+
         # In a real scenario, this would use a ComplianceProvider to do the evaluation.
         # For now, we mock the result.
         status = ComplianceEvaluation.Status.PASSED

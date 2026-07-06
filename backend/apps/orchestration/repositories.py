@@ -49,7 +49,7 @@ class WorkflowExecutionRepository:
             update_fields["outputs"] = outputs
         if status in [WorkflowExecution.Status.COMPLETED, WorkflowExecution.Status.FAILED, WorkflowExecution.Status.CANCELLED]:
             update_fields["completed_at"] = timezone.now()
-            
+
         WorkflowExecution.objects.filter(id=execution_id).update(**update_fields)
 
     @staticmethod

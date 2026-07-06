@@ -24,11 +24,11 @@ def test_osint_retriever():
 def test_rag_service_aggregation():
     service = RAGService()
     context = service.get_context("tenant1", "workspace1", "test query")
-    
+
     assert context.query == "test query"
     # It aggregates from 3 mocked retrievers, each returns at least 1
     assert len(context.sources) >= 3
-    
+
     # Test ordering (relevance_score descending)
     scores = [s.relevance_score for s in context.sources]
     assert scores == sorted(scores, reverse=True)

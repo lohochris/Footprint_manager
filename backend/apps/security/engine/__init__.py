@@ -50,7 +50,7 @@ class SecurityEngine:
             session = self.session_repository.get_active_session(context.session_id)
             if not session:
                 return False
-            
+
             # Check session timeout
             delta = datetime.now() - session.last_activity.replace(tzinfo=None)
             if delta.total_seconds() / 60 > policy.session_timeout_minutes:
@@ -77,7 +77,7 @@ class SecurityEngine:
             user_agent=context.user_agent,
             details=details,
         )
-        
+
         event_bus.publish(
             "SecurityAlertGenerated" if event_type in [SecurityEvent.EventType.FAILED_LOGIN] else event_type,
             {

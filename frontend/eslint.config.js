@@ -31,6 +31,7 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-unused-vars': 'off',
+      'no-undef': 'off',
     },
   },
   {
