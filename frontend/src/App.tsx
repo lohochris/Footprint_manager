@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 
 import { store } from '@/store';
 import { AppThemeProvider, TelemetryProvider } from '@/providers';
+import { AuthProvider } from '@/providers/AuthProvider';
 import { router } from '@/router';
 
 const App: React.FC = () => {
@@ -11,7 +12,9 @@ const App: React.FC = () => {
     <Provider store={store}>
       <TelemetryProvider>
         <AppThemeProvider>
-          <RouterProvider router={router} />
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
         </AppThemeProvider>
       </TelemetryProvider>
     </Provider>

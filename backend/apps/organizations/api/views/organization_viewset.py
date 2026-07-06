@@ -2,16 +2,16 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..permissions.organization import IsOrganizationMember, IsOrganizationOwner
-from ..selectors.organization import get_organization_by_id, get_user_organization_membership
-from ..serializers.organization import (
+from backend.apps.organizations.permissions.organization import IsOrganizationMember, IsOrganizationOwner
+from backend.apps.organizations.selectors.organization import get_organization_by_id, get_user_organization_membership
+from backend.apps.organizations.serializers.organization import (
     OrganizationCreateSerializer,
     OrganizationSerializer,
     OrganizationUpdateSerializer,
 )
-from ..services import OrganizationService
-from .pagination import StandardResultsSetPagination
-from .throttling import SensitiveActionThrottle
+from backend.apps.organizations.services import OrganizationService
+from backend.apps.organizations.api.pagination import StandardResultsSetPagination
+from backend.apps.organizations.api.throttling import SensitiveActionThrottle
 
 
 class OrganizationViewSet(viewsets.GenericViewSet):
@@ -28,6 +28,7 @@ class OrganizationViewSet(viewsets.GenericViewSet):
     pagination_class = StandardResultsSetPagination
     throttle_classes = []  # normal read endpoints are not throttled
     permission_classes = [IsOrganizationMember]
+    serializer_class = OrganizationSerializer
 
     def get_queryset(self):
         # Use selector to fetch organizations the user belongs to.

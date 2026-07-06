@@ -1,9 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { ShellLayout } from '@/layouts/ShellLayout';
-import { RequireAuth, RequireWorkspace } from './guards';
+import { RequireAuth, RequireGuest, RequireWorkspace } from './guards';
 import { GlobalErrorBoundary } from '@/components/GlobalErrorBoundary';
-import { WorkspaceContextProvider } from '@/providers';
+import { LoginView } from '@/features/auth/views/LoginView';
 
 // Placeholder empty components to satisfy Phase 1 routing structure
 // In subsequent phases, these will be replaced with actual Lazy-loaded feature components
@@ -30,11 +30,7 @@ export const router = createBrowserRouter([
         element: <RequireWorkspace />,
         children: [
           {
-            element: (
-              <WorkspaceContextProvider>
-                <ShellLayout />
-              </WorkspaceContextProvider>
-            ),
+            element: <ShellLayout />,
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
               { path: 'dashboard', element: <PlaceholderComponent title="Dashboard" /> },
@@ -63,6 +59,9 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <PlaceholderComponent title="Login Page" />
+    element: <RequireGuest />,
+    children: [
+      { index: true, element: <LoginView /> }
+    ]
   }
 ]);

@@ -2,16 +2,16 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..permissions.workspace import IsWorkspaceMember, IsWorkspaceOwner
-from ..selectors.workspace import get_workspace_by_id
-from ..serializers.workspace import (
+from backend.apps.organizations.permissions.workspace import IsWorkspaceMember, IsWorkspaceOwner
+from backend.apps.organizations.selectors.workspace import get_workspace_by_id
+from backend.apps.organizations.serializers.workspace import (
     WorkspaceCreateSerializer,
     WorkspaceSerializer,
     WorkspaceUpdateSerializer,
 )
-from ..services.workspace_service import WorkspaceService
-from .pagination import StandardResultsSetPagination
-from .throttling import SensitiveActionThrottle
+from backend.apps.organizations.services.workspace_service import WorkspaceService
+from backend.apps.organizations.api.pagination import StandardResultsSetPagination
+from backend.apps.organizations.api.throttling import SensitiveActionThrottle
 
 
 class WorkspaceViewSet(viewsets.GenericViewSet):
@@ -28,6 +28,7 @@ class WorkspaceViewSet(viewsets.GenericViewSet):
     pagination_class = StandardResultsSetPagination
     throttle_classes = []
     permission_classes = [IsWorkspaceMember]
+    serializer_class = WorkspaceSerializer
 
     def get_queryset(self):
         user = self.request.user

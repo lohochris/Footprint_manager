@@ -13,7 +13,7 @@ from ..validators import (
 class OrganizationSerializer(serializers.ModelSerializer):
     """Read‑only representation of an Organization."""
 
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = Organization  # type: ignore[assignment]
         fields = [
             "id",
