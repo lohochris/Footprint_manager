@@ -18,19 +18,19 @@ class BootstrapAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        
+
         # 1. Serialize User
         user_data = UserSerializer(user).data
-        
+
         # 2. Fetch and Serialize Organizations
         organizations = OrganizationService.list_user_organizations(user.id)
         org_data = OrganizationSerializer(organizations, many=True).data
-        
+
         # 3. Fetch Workspaces (Workspaces linked to those organizations)
         # Assuming the simplest approach is to fetch workspaces per organization.
-        # If WorkspaceService.list_user_workspaces exists we would use it, 
-        # but let's safely extract them from the user's organizations if they are prefetched, 
-        # or just fetch them by iterating if necessary. 
+        # If WorkspaceService.list_user_workspaces exists we would use it,
+        # but let's safely extract them from the user's organizations if they are prefetched,
+        # or just fetch them by iterating if necessary.
         # A more robust backend might have a `WorkspaceService.list_user_workspaces(user.id)`.
         # Let's check if the orgs have `workspaces` related name.
         all_workspaces = []
@@ -38,7 +38,7 @@ class BootstrapAPIView(APIView):
             # Safely fetch active workspaces for each org
             for workspace in org.workspaces.filter(is_archived=False):
                 all_workspaces.append(workspace)
-                
+
         workspace_data = WorkspaceSerializer(all_workspaces, many=True).data
 
         return Response({

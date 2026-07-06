@@ -1,3 +1,4 @@
+from backend.shared.utils.tenant_resolver import get_tenant_id_for_user
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -18,7 +19,7 @@ class TaskViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         workspace_id = request.query_params.get("workspace_id")
 
         if workspace_id:
@@ -30,7 +31,7 @@ class TaskViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         workspace_id = request.data.get("case_workspace_id")
         title = request.data.get("title")
         description = request.data.get("description", "")
@@ -48,7 +49,7 @@ class TaskViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["post"])
     def assign(self, request, pk=None):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         serializer = AssignTaskSerializer(data=request.data)
         if serializer.is_valid():
             assignee_id = serializer.validated_data["assignee_id"]
@@ -67,14 +68,14 @@ class NotificationViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         notifications = NotificationSelector.list_unread_for_user(tenant_id, request.user.id)
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=["post"])
     def mark_read(self, request):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         notification_ids = request.data.get("notification_ids", [])
         notification_service.mark_as_read(tenant_id, request.user.id, notification_ids)
         return Response({"status": "marked as read"})

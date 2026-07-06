@@ -6,7 +6,7 @@ from .dto import StreamEventDTO
 
 class StreamService:
     @staticmethod
-    def publish_event(tenant_id: uuid.UUID, channel_type: str, resource_identifier: str, event_type: str, payload: Dict[str, Any], correlation_id: Optional[str] = None, causation_id: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+    def publish_event(tenant_id: uuid.UUID, channel_type: str, resource_identifier: str, event_type: str, payload: Dict[str, Any], _correlation_id: Optional[str] = None, _causation_id: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """
         Publishes an event to the realtime engine and logs it.
         """

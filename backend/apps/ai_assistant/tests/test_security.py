@@ -19,8 +19,6 @@ def test_tenant_isolation_sessions(user):
     session_a = AssistantSession.objects.create(tenant_id=tenant_a, owner=user, title="Tenant A Session")
     session_b = AssistantSession.objects.create(tenant_id=tenant_b, owner=user, title="Tenant B Session")
 
-    client = APIClient()
-
     # Simulate middleware injecting tenant_id for Tenant A
     class MockRequestAuth:
         def __init__(self, tenant_id):

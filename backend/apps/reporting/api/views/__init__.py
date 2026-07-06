@@ -24,13 +24,13 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def publish(self, request, pk=None):
-        report = self.get_object()
+        self.get_object()
         # Integration with PublishingService
         return Response({"status": "published"})
 
     @action(detail=True, methods=["post"])
     def generate_preview(self, request, pk=None):
-        report = self.get_object()
+        self.get_object()
         # Integration with ReportService to assemble content and template provider to render
         return Response({"status": "preview_generated"})
 
@@ -51,7 +51,7 @@ class ReportVersionViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["post"])
     def export(self, request, pk=None):
-        version = self.get_object()
+        self.get_object()
         format = request.data.get("format", "PDF")
         # Integration with ExportService
         return Response({"status": "export_started", "format": format})

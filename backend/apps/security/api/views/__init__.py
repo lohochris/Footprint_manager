@@ -24,7 +24,7 @@ class APIKeyViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def revoke(self, request, pk=None):
-        api_key = self.get_object()
+        self.get_object()
         # Integration with APIKeyService
         return Response({"status": "revoked"})
 
@@ -40,7 +40,7 @@ class SecuritySessionViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["post"])
     def revoke(self, request, pk=None):
-        session = self.get_object()
+        self.get_object()
         # Integration with SecurityEngine/SessionService
         return Response({"status": "revoked"})
 

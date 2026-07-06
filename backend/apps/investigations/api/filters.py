@@ -10,7 +10,7 @@ class InvestigationFilter(django_filters.FilterSet):
     investigation_type = django_filters.CharFilter(field_name="investigation_type", lookup_expr="exact")
     classification = django_filters.CharFilter(field_name="classification", lookup_expr="exact")
     organization = django_filters.UUIDFilter(field_name="organization_id", lookup_expr="exact")
-    workspace = django_filters.UUIDFilter(field_name="workspace_id", lookup_expr="exact")
+    workspace = django_filters.CharFilter(method="filter_workspace")
     owner = django_filters.NumberFilter(field_name="owner_id", lookup_expr="exact")
     lead_investigator = django_filters.NumberFilter(field_name="lead_investigator_id", lookup_expr="exact")
     created_at = django_filters.DateTimeFromToRangeFilter(field_name="created_at")
@@ -38,3 +38,14 @@ class InvestigationFilter(django_filters.FilterSet):
         if not value:
             return queryset
         return queryset.filter(tags__contains=[value])
+
+    def filter_workspace(self, queryset, name, value):
+        """Filter by workspace ID (UUID) or workspace slug."""
+        if not value:
+            return queryset
+        import uuid
+        try:
+            uuid_val = uuid.UUID(value)
+            return queryset.filter(workspace_id=uuid_val)
+        except ValueError:
+            return queryset.filter(workspace__slug=value)

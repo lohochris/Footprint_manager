@@ -3,6 +3,7 @@ import { Navigate, Outlet, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
 import { setActiveWorkspace } from '@/store/slices/authSlice';
+import { routes } from './routes';
 
 export const RequireAuth: React.FC = () => {
   const { isAuthenticated, bootstrapStatus } = useSelector((state: RootState) => state.auth);
@@ -41,7 +42,7 @@ export const RequireWorkspace: React.FC = () => {
   if (!isValidWorkspace) {
     // If not a valid workspace, redirect to a workspace selector or a default workspace
     if (workspaces.length > 0) {
-      return <Navigate to={`/workspace/${workspaces[0].slug}/dashboard`} replace />;
+      return <Navigate to={routes.dashboard(workspaces[0].slug)} replace />;
     }
     // Handle the case where they have no workspaces
     return <div>You do not belong to any workspaces.</div>;

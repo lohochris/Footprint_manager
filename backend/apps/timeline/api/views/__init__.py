@@ -20,7 +20,7 @@ class TimelineViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["get"])
     def playback(self, request, pk=None):
-        timeline = self.get_object()
+        self.get_object()
         # Integration with PlaybackService goes here
         # Return reconstructed state at requested timestamp
         return Response({"status": "playback_generated"})

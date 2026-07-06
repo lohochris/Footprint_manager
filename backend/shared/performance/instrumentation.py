@@ -1,4 +1,5 @@
 import functools
+import logging
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional
@@ -55,8 +56,9 @@ def track_performance(context_provider: Callable[..., PerformanceContext]):
                         },
                     )
                 except Exception:
-                    # Normally we would log to stdout or a raw logger here
-                    pass
+                    logging.getLogger(__name__).debug(
+                        "Performance telemetry failed", exc_info=True
+                    )
 
         return wrapper
 

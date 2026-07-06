@@ -48,7 +48,6 @@ class DecisionEngineCoordinator:
             policy_matched = False
 
             for rule in rules:
-                rule_dto = rule  # In a real app we'd map this, assuming rule_provider accepts model or we map it
                 # Convert model to DTO for provider
                 rule_dto_obj = self._map_rule_to_dto(rule)
                 is_match = self.rule_provider.evaluate_rule(rule_dto_obj, input_data)

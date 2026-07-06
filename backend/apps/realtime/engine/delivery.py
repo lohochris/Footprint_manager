@@ -6,7 +6,7 @@ from ..selectors import SubscriptionSelector
 
 class DeliveryEngine:
     @staticmethod
-    def deliver_event(tenant_id: uuid.UUID, channel_id: uuid.UUID, event_type: str, payload: Dict[str, Any], idempotency_key: Optional[str] = None) -> None:
+    def deliver_event(tenant_id: uuid.UUID, channel_id: uuid.UUID, event_type: str, payload: Dict[str, Any], _idempotency_key: Optional[str] = None) -> None:
         """
         Fans out the event to all active subscriptions on the channel.
         Delegates protocol-specific sending to the ProviderRegistry.

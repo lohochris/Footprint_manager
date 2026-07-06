@@ -1,3 +1,4 @@
+from backend.shared.utils.tenant_resolver import get_tenant_id_for_user
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -22,13 +23,13 @@ class PolicyViewSet(viewsets.ViewSet):
         self.policy_service = PolicyService()
 
     def list(self, request):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         policies = self.policy_selector.list_policies(tenant_id)
         # Assuming we have a standard serializer or just return dicts for MVP
         return Response([p.__dict__ for p in policies])
 
     def retrieve(self, request, pk=None):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         policy = self.policy_selector.get_policy_detail(tenant_id, pk)
         if not policy:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -40,7 +41,7 @@ class PolicyViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["post"], permission_classes=[CanPublishPolicy])
     def publish(self, request, pk=None):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         success = self.policy_service.publish_policy(tenant_id, pk, str(request.user.id))
         if success:
             return Response({"status": "published"})
@@ -49,7 +50,7 @@ class PolicyViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"])
     def simulate(self, request):
         """Simulate policy execution without side-effects."""
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         payload = request.data.get("payload", {})
         event_type = request.data.get("event_type", "simulation")
 
@@ -80,7 +81,7 @@ class DecisionViewSet(viewsets.ViewSet):
         self.decision_selector = DecisionSelector()
 
     def retrieve(self, request, pk=None):
-        tenant_id = request.user.tenant_id
+        tenant_id = get_tenant_id_for_user(request.user)
         decision = self.decision_selector.get_decision_detail(tenant_id, pk)
         if not decision:
             return Response(status=status.HTTP_404_NOT_FOUND)

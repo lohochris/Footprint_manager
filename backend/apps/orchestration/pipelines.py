@@ -13,7 +13,7 @@ def register_orchestration_pipelines():
     )
 
     # Placeholders for additional lifecycle events
-    PipelineRegistry.register("workflow.resume", lambda **payload: None)
-    PipelineRegistry.register("workflow.retry", lambda **payload: None)
-    PipelineRegistry.register("workflow.cancel", lambda **payload: None)
-    PipelineRegistry.register("workflow.approve", lambda **payload: None)
+    PipelineRegistry.register("workflow.resume", lambda **_: None)
+    PipelineRegistry.register("workflow.retry", lambda **_: None)
+    PipelineRegistry.register("workflow.cancel", lambda **_: None)
+    PipelineRegistry.register("workflow.approve", lambda **_: None)

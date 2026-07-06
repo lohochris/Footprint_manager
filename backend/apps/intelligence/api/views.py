@@ -60,25 +60,74 @@ class EntityScoreViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = EntityScoreSerializer
 
     def get_queryset(self):
-        return EntityScore.objects.filter(tenant_id=self.request.user.tenant_id)
+        user = self.request.user
+        if not user.is_authenticated:
+            return EntityScore.objects.none()
+        from backend.apps.organizations.models import OrganizationMember
+        member = OrganizationMember.objects.filter(user=user, status="active").first()
+        if not member:
+            return EntityScore.objects.none()
+        return EntityScore.objects.filter(tenant_id=member.organization_id)
 
 
 class IntelligenceRecommendationViewSet(viewsets.ModelViewSet):
     serializer_class = IntelligenceRecommendationSerializer
 
     def get_queryset(self):
-        return IntelligenceRecommendation.objects.filter(tenant_id=self.request.user.tenant_id)
+        user = self.request.user
+        if not user.is_authenticated:
+            return IntelligenceRecommendation.objects.none()
+        from backend.apps.organizations.models import OrganizationMember
+        member = OrganizationMember.objects.filter(user=user, status="active").first()
+        if not member:
+            return IntelligenceRecommendation.objects.none()
+
+        queryset = IntelligenceRecommendation.objects.filter(tenant_id=member.organization_id)
+
+        workspace = self.request.query_params.get("workspace")
+        if workspace:
+            import uuid
+            try:
+                uuid_val = uuid.UUID(workspace)
+                queryset = queryset.filter(workspace_id=uuid_val)
+            except ValueError:
+                queryset = queryset.filter(workspace__slug=workspace)
+        return queryset
 
 
 class WatchlistEntryViewSet(viewsets.ModelViewSet):
     serializer_class = WatchlistEntrySerializer
 
     def get_queryset(self):
-        return WatchlistEntry.objects.filter(tenant_id=self.request.user.tenant_id)
+        user = self.request.user
+        if not user.is_authenticated:
+            return WatchlistEntry.objects.none()
+        from backend.apps.organizations.models import OrganizationMember
+        member = OrganizationMember.objects.filter(user=user, status="active").first()
+        if not member:
+            return WatchlistEntry.objects.none()
+        return WatchlistEntry.objects.filter(tenant_id=member.organization_id)
 
 
 class InvestigationPriorityViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = InvestigationPrioritySerializer
 
     def get_queryset(self):
-        return InvestigationPriority.objects.filter(tenant_id=self.request.user.tenant_id)
+        user = self.request.user
+        if not user.is_authenticated:
+            return InvestigationPriority.objects.none()
+        from backend.apps.organizations.models import OrganizationMember
+        member = OrganizationMember.objects.filter(user=user, status="active").first()
+        if not member:
+            return InvestigationPriority.objects.none()
+
+        queryset = InvestigationPriority.objects.filter(tenant_id=member.organization_id)
+        workspace = self.request.query_params.get("workspace")
+        if workspace:
+            import uuid
+            try:
+                uuid_val = uuid.UUID(workspace)
+                queryset = queryset.filter(workspace_id=uuid_val)
+            except ValueError:
+                queryset = queryset.filter(workspace__slug=workspace)
+        return queryset

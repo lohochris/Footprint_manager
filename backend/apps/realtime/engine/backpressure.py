@@ -5,7 +5,7 @@ class BackpressureControl:
     MAX_QUEUE_DEPTH = 1000
 
     @classmethod
-    def check_capacity(cls, connection_id: str) -> bool:
+    def check_capacity(cls, _connection_id: str) -> bool:
         """
         Check if the connection has reached backpressure limits.
         If it has, we might drop the event or disconnect the client.

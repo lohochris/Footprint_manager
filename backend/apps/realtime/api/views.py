@@ -1,3 +1,4 @@
+from backend.shared.utils.tenant_resolver import get_tenant_id_for_user
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -20,20 +21,20 @@ class ChannelViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsRealtimeUser]
 
     def get_queryset(self):
-        return RealtimeChannel.objects.filter(tenant_id=self.request.user.tenant_id)
+        return RealtimeChannel.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user))
 
 class ConnectionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ConnectionSerializer
     permission_classes = [IsRealtimeUser]
 
     def get_queryset(self):
-        return Connection.objects.filter(tenant_id=self.request.user.tenant_id, user=self.request.user)
+        return Connection.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user), user=self.request.user)
 
     @extend_schema(responses={200: dict})
     @action(detail=True, methods=['post'])
     def heartbeat(self, request, pk=None):
         connection = self.get_object()
-        ConnectionService.heartbeat(request.user.tenant_id, connection.session_id)
+        ConnectionService.heartbeat(get_tenant_id_for_user(request.user), connection.session_id)
         return Response({"status": "heartbeat recorded"})
 
 class SubscriptionViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -41,25 +42,25 @@ class SubscriptionViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mi
     permission_classes = [IsRealtimeUser]
 
     def get_queryset(self):
-        return Subscription.objects.filter(tenant_id=self.request.user.tenant_id, user=self.request.user)
+        return Subscription.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user), user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(tenant_id=self.request.user.tenant_id, user=self.request.user)
+        serializer.save(tenant_id=get_tenant_id_for_user(self.request.user), user=self.request.user)
 
 class PresenceViewSet(viewsets.ModelViewSet):
     serializer_class = PresenceSerializer
     permission_classes = [IsRealtimeUser]
 
     def get_queryset(self):
-        return Presence.objects.filter(tenant_id=self.request.user.tenant_id)
+        return Presence.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user))
 
     def perform_create(self, serializer):
         # We enforce user context
-        serializer.save(tenant_id=self.request.user.tenant_id, user=self.request.user)
+        serializer.save(tenant_id=get_tenant_id_for_user(self.request.user), user=self.request.user)
 
 class StreamAuditViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = StreamAuditSerializer
     permission_classes = [IsRealtimeUser]
 
     def get_queryset(self):
-        return StreamAudit.objects.filter(tenant_id=self.request.user.tenant_id)
+        return StreamAudit.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user))

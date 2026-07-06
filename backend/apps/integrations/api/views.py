@@ -1,3 +1,4 @@
+from backend.shared.utils.tenant_resolver import get_tenant_id_for_user
 import uuid
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -15,27 +16,27 @@ class IntegrationViewSet(viewsets.ModelViewSet):
     permission_classes = [IntegrationManagePermission]
 
     def get_queryset(self):
-        return Integration.objects.filter(tenant_id=self.request.user.tenant_id)
+        return Integration.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user))
 
     def perform_create(self, serializer):
-        serializer.save(tenant_id=self.request.user.tenant_id)
+        serializer.save(tenant_id=get_tenant_id_for_user(self.request.user))
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
     serializer_class = SubscriptionSerializer
     permission_classes = [IntegrationManagePermission]
 
     def get_queryset(self):
-        return Subscription.objects.filter(tenant_id=self.request.user.tenant_id)
+        return Subscription.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user))
 
     def perform_create(self, serializer):
-        serializer.save(tenant_id=self.request.user.tenant_id)
+        serializer.save(tenant_id=get_tenant_id_for_user(self.request.user))
 
 class IntegrationEventViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IntegrationEventSerializer
     permission_classes = [IntegrationManagePermission]
 
     def get_queryset(self):
-        return IntegrationEvent.objects.filter(tenant_id=self.request.user.tenant_id)
+        return IntegrationEvent.objects.filter(tenant_id=get_tenant_id_for_user(self.request.user))
 
 class WebhookReceiverView(APIView):
     permission_classes = [WebhookReceiverPermission]

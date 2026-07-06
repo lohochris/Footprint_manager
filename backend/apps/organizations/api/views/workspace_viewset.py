@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from backend.apps.organizations.permissions.workspace import IsWorkspaceMember, IsWorkspaceOwner
-from backend.apps.organizations.selectors.workspace import get_workspace_by_id
+from backend.shared.utils.tenant_resolver import resolve_workspace
 from backend.apps.organizations.serializers.workspace import (
     WorkspaceCreateSerializer,
     WorkspaceSerializer,
@@ -48,7 +48,7 @@ class WorkspaceViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
-        workspace = get_workspace_by_id(pk)
+        workspace = resolve_workspace(request.user, pk)
         self.check_object_permissions(request, workspace)
         serializer = WorkspaceSerializer(workspace)
         return Response(serializer.data)
@@ -68,7 +68,7 @@ class WorkspaceViewSet(viewsets.GenericViewSet):
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None, *args, **kwargs):
-        workspace = get_workspace_by_id(pk)
+        workspace = resolve_workspace(request.user, pk)
         self.check_object_permissions(request, workspace)
         serializer = WorkspaceUpdateSerializer(data=request.data, partial=False)
         serializer.is_valid(raise_exception=True)
@@ -77,7 +77,7 @@ class WorkspaceViewSet(viewsets.GenericViewSet):
         return Response(out_serializer.data)
 
     def partial_update(self, request, pk=None, *args, **kwargs):
-        workspace = get_workspace_by_id(pk)
+        workspace = resolve_workspace(request.user, pk)
         self.check_object_permissions(request, workspace)
         serializer = WorkspaceUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -87,12 +87,12 @@ class WorkspaceViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=["post"], permission_classes=[IsWorkspaceOwner], throttle_classes=[SensitiveActionThrottle])
     def archive(self, request, pk=None):
-        workspace = get_workspace_by_id(pk)
+        workspace = resolve_workspace(request.user, pk)
         WorkspaceService.archive_workspace(workspace, request.user)
         return Response({"detail": "Workspace archived"}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"], permission_classes=[IsWorkspaceOwner], throttle_classes=[SensitiveActionThrottle])
     def restore(self, request, pk=None):
-        workspace = get_workspace_by_id(pk)
+        workspace = resolve_workspace(request.user, pk)
         WorkspaceService.restore_workspace(workspace, request.user)
         return Response({"detail": "Workspace restored"}, status=status.HTTP_200_OK)

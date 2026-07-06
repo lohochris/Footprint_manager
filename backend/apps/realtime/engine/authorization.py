@@ -4,7 +4,7 @@ from ..models.channel import RealtimeChannel
 
 class ChannelAuthorization:
     @staticmethod
-    def is_authorized(user_id: uuid.UUID, channel: RealtimeChannel) -> bool:
+    def is_authorized(_user_id: uuid.UUID, channel: RealtimeChannel) -> bool:
         """
         Evaluates permissions_required against the user.
         In a real implementation, this would look up organization roles,

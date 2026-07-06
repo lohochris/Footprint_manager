@@ -1,3 +1,5 @@
+import contextlib
+
 from django.apps import AppConfig
 
 
@@ -7,7 +9,5 @@ class GovernanceConfig(AppConfig):
     verbose_name = "Governance"
 
     def ready(self) -> None:
-        try:
+        with contextlib.suppress(ImportError):
             import backend.apps.governance.events.consumers  # noqa: F401
-        except ImportError:
-            pass

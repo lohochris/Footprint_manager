@@ -4,6 +4,11 @@ import { ShellLayout } from '@/layouts/ShellLayout';
 import { RequireAuth, RequireGuest, RequireWorkspace } from './guards';
 import { GlobalErrorBoundary } from '@/components/GlobalErrorBoundary';
 import { LoginView } from '@/features/auth/views/LoginView';
+import { lazy, Suspense } from 'react';
+import { routes } from './routes';
+
+const DashboardView = lazy(() => import('@/features/dashboard/views/DashboardView').then(m => ({ default: m.DashboardView })));
+const AiAssistantView = lazy(() => import('@/features/ai-assistant/views/AiAssistantView').then(m => ({ default: m.AiAssistantView })));
 
 // Placeholder empty components to satisfy Phase 1 routing structure
 // In subsequent phases, these will be replaced with actual Lazy-loaded feature components
@@ -19,7 +24,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/workspace/default/dashboard" replace />
+        element: <Navigate to={routes.dashboard('default')} replace />
       },
       {
         path: 'select-workspace',
@@ -33,7 +38,14 @@ export const router = createBrowserRouter([
             element: <ShellLayout />,
             children: [
               { index: true, element: <Navigate to="dashboard" replace /> },
-              { path: 'dashboard', element: <PlaceholderComponent title="Dashboard" /> },
+              { 
+                path: 'dashboard', 
+                element: (
+                  <Suspense fallback={<div style={{ padding: 24 }}>Loading dashboard...</div>}>
+                    <DashboardView />
+                  </Suspense>
+                )
+              },
               { path: 'investigations', element: <PlaceholderComponent title="Investigations" /> },
               { path: 'investigations/:id', element: <PlaceholderComponent title="Investigation Details" /> },
               { path: 'evidence', element: <PlaceholderComponent title="Evidence Workspace" /> },
@@ -42,6 +54,22 @@ export const router = createBrowserRouter([
               { path: 'timeline', element: <PlaceholderComponent title="Timeline Intelligence" /> },
               { path: 'intelligence', element: <PlaceholderComponent title="Intelligence" /> },
               { path: 'integrations', element: <PlaceholderComponent title="Integrations" /> },
+              {
+                path: 'ai',
+                element: (
+                  <Suspense fallback={<div style={{ padding: 24 }}>Loading AI Assistant…</div>}>
+                    <AiAssistantView />
+                  </Suspense>
+                )
+              },
+              {
+                path: 'ai/:sessionId',
+                element: (
+                  <Suspense fallback={<div style={{ padding: 24 }}>Loading session…</div>}>
+                    <AiAssistantView />
+                  </Suspense>
+                )
+              },
             ]
           }
         ]

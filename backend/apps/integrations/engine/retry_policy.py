@@ -16,7 +16,4 @@ class RetryPolicy:
             return False
 
         # Optional logic: don't retry on 400 Bad Request
-        if error_code and str(error_code).startswith("40") and error_code not in ("408", "429"):
-            return False
-
-        return True
+        return not (error_code and str(error_code).startswith("40") and error_code not in ("408", "429"))

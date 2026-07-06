@@ -35,7 +35,7 @@ class APIKeyService:
             organization_id=organization_id,
         )
 
-        event = self.event_repository.log_event(
+        self.event_repository.log_event(
             event_type=SecurityEvent.EventType.API_KEY_CREATED,
             tenant_id=tenant_id,
             organization_id=organization_id,

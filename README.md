@@ -47,8 +47,16 @@ Services:
 # Backend
 cp .env.example .env
 pip install -r requirements/development.txt -r requirements/testing.txt
-cd backend && python manage.py migrate
-cd backend && python manage.py runserver
+cd backend
+python manage.py migrate
+python manage.py setup_dev_env
+python manage.py runserver
+```
+
+**Development Login:**
+After running `setup_dev_env`, you can log into the frontend using:
+- Email: `admin@footprint.local`
+- Password: `DevPassword123!`
 
 # Frontend (separate terminal)
 cd frontend && npm install && npm run dev

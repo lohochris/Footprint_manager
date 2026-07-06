@@ -1,3 +1,5 @@
+import contextlib
+
 from django.apps import AppConfig
 
 
@@ -7,7 +9,5 @@ class TimelineConfig(AppConfig):
     verbose_name = "Timeline"
 
     def ready(self) -> None:
-        try:
+        with contextlib.suppress(ImportError):
             import backend.apps.timeline.events.consumers  # noqa: F401
-        except ImportError:
-            pass

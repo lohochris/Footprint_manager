@@ -5,7 +5,7 @@ import { baseQueryWithReauth } from './baseQuery';
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Health'],
+  tagTypes: ['Health', 'AiSessions', 'AiMessages'],
   endpoints: (builder) => ({
     getHealth: builder.query<{ status: string; service: string }, void>({
       query: () => '/health/',
